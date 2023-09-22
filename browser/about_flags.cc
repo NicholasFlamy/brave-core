@@ -869,6 +869,14 @@
           "Not recommended.",                                                  \
           kOsWin | kOsLinux | kOsMac,                                          \
           FEATURE_VALUE_TYPE(features::kBraveOverrideDownloadDangerLevel),     \
+      },                                                                       \
+      {                                                                        \
+          "brave-custom-sync-server",                                          \
+          "Specify a custom sync server",                                      \
+          "Allows for the utilization of a custom sync server.",               \
+          kOsAndroid,                                                          \
+          ORIGIN_LIST_VALUE_TYPE(                                              \
+              brave_sync::features::kBraveSyncCustomURL,""),                   \
       })                                                                       \
   BRAVE_IPFS_FEATURE_ENTRIES                                                   \
   BRAVE_NATIVE_WALLET_FEATURE_ENTRIES                                          \

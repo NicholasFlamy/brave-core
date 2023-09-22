@@ -17,6 +17,8 @@ BASE_DECLARE_FEATURE(kBraveSyncHistoryDiagnostics);
 
 BASE_DECLARE_FEATURE(kBraveSyncSendAllHistory);
 
+extern const char kBraveSyncCustomURL[];
+
 }  // namespace features
 }  // namespace brave_sync
 

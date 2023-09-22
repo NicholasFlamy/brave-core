@@ -28,5 +28,7 @@ BASE_FEATURE(kBraveSyncSendAllHistory,
              "BraveSyncSendAllHistory",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
+const char kBraveSyncCustomURL[] = "brave-custom-sync-server";
+
 }  // namespace features
 }  // namespace brave_sync
