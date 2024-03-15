@@ -12,5 +12,7 @@ namespace features {
 
 BASE_FEATURE(kBraveSync, "BraveSync", base::FEATURE_ENABLED_BY_DEFAULT);
 
+const char kBraveSyncCustomURL[] = "brave-custom-sync-server";
+
 }  // namespace features
 }  // namespace brave_sync
