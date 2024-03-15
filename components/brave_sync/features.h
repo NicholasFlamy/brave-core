@@ -13,6 +13,8 @@ namespace features {
 
 BASE_DECLARE_FEATURE(kBraveSync);
 
+extern const char kBraveSyncCustomURL[];
+
 }  // namespace features
 }  // namespace brave_sync
 
