@@ -52,23 +52,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/brave/brave-core.git"
+    "url": "git+https://github.com/NicholasFlamy/brave-core-custom-sync.git"
   },
   "author": {
-    "name": "Brave Software <support@brave.com>"
+    "name": "Brave Software <support@brave.com> (This build by NicholasFlamy)"
   },
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/brave/brave-browser/issues"
+    "url": "https://github.com/NicholasFlamy/brave-browser-custom-sync/issues"
   },
-  "homepage": "https:/github.com/brave/brave-core#readme",
+  "homepage": "https:/github.com/NicholasFlamy/brave-core-custom-sync#readme",
   "config": {
     "projects": {
       "chrome": {
         "dir": "src",
         "tag": "123.0.6312.46",
         "repository": {
-          "url": "https://github.com/brave/chromium"
+          "url": "https://github.com/NicholasFlamy/brave-chromium-custom-sync"
         }
       }
     }
