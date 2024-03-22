@@ -4,7 +4,6 @@
 // you can obtain one at https://mozilla.org/MPL/2.0/.
 
 import * as React from 'react'
-import { skipToken } from '@reduxjs/toolkit/query/react'
 
 // Components
 import {
@@ -33,8 +32,6 @@ import {
 } from '../stories/style'
 import { PanelWrapper, WelcomePanelWrapper } from './style'
 
-import { BraveWallet } from '../constants/types'
-
 import { TransactionStatus } from '../components/extension/post-confirmation'
 import {
   useSafePanelSelector,
@@ -44,7 +41,8 @@ import {
 import { WalletSelectors } from '../common/selectors'
 import { PanelSelectors } from './selectors'
 import {
-  useGetNetworkQuery,
+  useGetPendingAddChainRequestQuery,
+  useGetPendingSwitchChainRequestQuery,
   useGetPendingTokenSuggestionRequestsQuery
 } from '../common/slices/api.slice'
 import {
@@ -89,11 +87,7 @@ function Container() {
   const connectToSiteOrigin = useUnsafePanelSelector(
     PanelSelectors.connectToSiteOrigin
   )
-  const addChainRequest = useUnsafePanelSelector(PanelSelectors.addChainRequest)
   const signMessageData = useUnsafePanelSelector(PanelSelectors.signMessageData)
-  const switchChainRequest = useUnsafePanelSelector(
-    PanelSelectors.switchChainRequest
-  )
   const getEncryptionPublicKeyRequest = useUnsafePanelSelector(
     PanelSelectors.getEncryptionPublicKeyRequest
   )
@@ -114,17 +108,8 @@ function Container() {
   // queries & mutations
   const { accounts } = useAccountsQuery()
   const { data: selectedAccount } = useSelectedAccountQuery()
-  const { data: switchChainRequestNetwork } = useGetNetworkQuery(
-    switchChainRequest.chainId
-      ? {
-          chainId: switchChainRequest.chainId,
-          // Passed ETH here since AllowAddChangeNetworkPanel
-          // is only used for EVM networks
-          // and switchChainRequest doesn't return coinType.
-          coin: BraveWallet.CoinType.ETH
-        }
-      : skipToken
-  )
+  const { data: addChainRequest } = useGetPendingAddChainRequestQuery()
+  const { data: switchChainRequest } = useGetPendingSwitchChainRequestQuery()
   const { data: addTokenRequests = [] } =
     useGetPendingTokenSuggestionRequestsQuery()
 
@@ -194,28 +179,24 @@ function Container() {
     )
   }
 
-  if (selectedPanel === 'addEthereumChain') {
+  if (addChainRequest) {
     return (
       <PanelWrapper isLonger={true}>
         <LongWrapper>
           <AllowAddChangeNetworkPanel
-            originInfo={addChainRequest.originInfo}
-            networkPayload={addChainRequest.networkInfo}
-            panelType='add'
+            addChainRequest={addChainRequest}
           />
         </LongWrapper>
       </PanelWrapper>
     )
   }
 
-  if (selectedPanel === 'switchEthereumChain' && switchChainRequestNetwork) {
+  if (switchChainRequest) {
     return (
       <PanelWrapper isLonger={true}>
         <LongWrapper>
           <AllowAddChangeNetworkPanel
-            originInfo={switchChainRequest.originInfo}
-            networkPayload={switchChainRequestNetwork}
-            panelType='change'
+            switchChainRequest={switchChainRequest}
           />
         </LongWrapper>
       </PanelWrapper>

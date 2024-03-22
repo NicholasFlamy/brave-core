@@ -9,11 +9,9 @@ import { PanelState } from '../../constants/types'
 // mocks
 import { mockOriginInfo } from './mock-origin-info'
 import {
-  mockAddChainRequest,
   mockSignMessageRequest,
   mockGetEncryptionPublicKeyRequest,
-  mockDecryptRequest,
-  mockSwitchChainRequest
+  mockDecryptRequest
 } from './mock-eth-requests'
 
 export const mockPanelState: PanelState = {
@@ -21,13 +19,11 @@ export const mockPanelState: PanelState = {
   connectToSiteOrigin: mockOriginInfo,
   selectedPanel: 'main',
   connectingAccounts: [],
-  addChainRequest: mockAddChainRequest,
   signMessageData: [mockSignMessageRequest],
   signAllTransactionsRequests: [],
   signTransactionRequests: [],
   getEncryptionPublicKeyRequest: mockGetEncryptionPublicKeyRequest,
   decryptRequest: mockDecryptRequest,
-  switchChainRequest: mockSwitchChainRequest,
   hardwareWalletCode: undefined,
   selectedTransactionId: undefined,
   signMessageErrorData: [
