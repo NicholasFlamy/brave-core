@@ -69,7 +69,9 @@ export function createWalletApiBase() {
       'IsMetaMaskInstalled',
       'IsPrivateWindow',
       'PendingAddChainRequests',
-      'PendingSwitchChainRequests'
+      'PendingSwitchChainRequests',
+      'PendingDecryptRequest',
+      'PendingEncryptRequest'
     ],
     endpoints: ({ mutation, query }) => ({})
   })

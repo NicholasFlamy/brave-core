@@ -88,9 +88,9 @@ class AdsService : public KeyedService {
   // an `event_type` event for the specified `placement_id` and
   // `creative_instance_id`. `placement_id` should be a 128-bit random GUID in
   // the form of version 4. See RFC 4122, section 4.4. The same `placement_id`
-  // generated for the viewed event should be used for all other events for the
-  // same ad placement. The callback takes one argument - `bool` is set to
-  // `true` if successful otherwise `false`.
+  // generated for the viewed impression event should be used for all other
+  // events for the same ad placement. The callback takes one argument - `bool`
+  // is set to `true` if successful otherwise `false`.
   virtual void TriggerInlineContentAdEvent(
       const std::string& placement_id,
       const std::string& creative_instance_id,
@@ -114,9 +114,9 @@ class AdsService : public KeyedService {
   // `event_type` event for the specified `placement_id` and
   // `creative_instance_id`. `placement_id` should be a 128-bit random GUID in
   // the form of version 4. See RFC 4122, section 4.4. The same `placement_id`
-  // generated for the viewed event should be used for all other events for the
-  // same ad placement. The callback takes one argument - `bool` is set to
-  // `true if successful otherwise `false`.
+  // generated for the viewed impression event should be used for all other
+  // events for the same ad placement. The callback takes one argument - `bool`
+  // is set to `true if successful otherwise `false`.
   virtual void TriggerNewTabPageAdEvent(const std::string& placement_id,
                                         const std::string& creative_instance_id,
                                         mojom::NewTabPageAdEventType event_type,
@@ -126,9 +126,9 @@ class AdsService : public KeyedService {
   // an `event_type` event for the specified `placement_id` and
   // `creative_instance_id`. `placement_id` should be a 128-bit random GUID in
   // the form of version 4. See RFC 4122, section 4.4. The same `placement_id`
-  // generated for the viewed event should be used for all other events for the
-  // same ad placement. The callback takes one argument - `bool` is set to
-  // `true` if successful otherwise `false`.
+  // generated for the viewed impression event should be used for all other
+  // events for the same ad placement. The callback takes one argument - `bool`
+  // is set to `true` if successful otherwise `false`.
   virtual void TriggerPromotedContentAdEvent(
       const std::string& placement_id,
       const std::string& creative_instance_id,
@@ -226,12 +226,13 @@ class AdsService : public KeyedService {
   // Invoked when a browser tab is updated with the specified `redirect_chain`
   // containing a list of redirect URLs that occurred on the way to the current
   // page. The current page is the last one in the list (so even when there's no
-  // redirect, there should be one entry in the list). `is_visible` should be
-  // set to `true` if `tab_id` refers to the currently visible tab otherwise
-  // should be set to `false`.
+  // redirect, there should be one entry in the list). `is_error_page` should be
+  // set to `true` if an error occurred otherwise should be set to `false`.
+  // `is_visible` should be set to `true` if `tab_id` refers to the currently
+  // visible tab otherwise should be set to `false`.
   virtual void NotifyTabDidChange(int32_t tab_id,
                                   const std::vector<GURL>& redirect_chain,
-                                  int32_t http_response_status_code,
+                                  bool is_error_page,
                                   bool is_visible) = 0;
 
   // Invoked when a browser tab with the specified `tab_id` is closed.

@@ -15,13 +15,13 @@
 #include "brave/components/brave_rewards/core/state/state_migration.h"
 
 namespace brave_rewards::internal {
-class RewardsEngineImpl;
+class RewardsEngine;
 
 namespace state {
 
 class State {
  public:
-  explicit State(RewardsEngineImpl& engine);
+  explicit State(RewardsEngine& engine);
   ~State();
 
   void Initialize(ResultCallback callback);
@@ -60,28 +60,6 @@ class State {
 
   void SetCreationStamp(const uint64_t stamp);
 
-  void SetRewardsParameters(const mojom::RewardsParameters& parameters);
-
-  mojom::RewardsParametersPtr GetRewardsParameters();
-
-  double GetRate();
-
-  double GetAutoContributeChoice();
-
-  std::vector<double> GetAutoContributeChoices();
-
-  std::vector<double> GetTipChoices();
-
-  std::vector<double> GetMonthlyTipChoices();
-
-  base::flat_map<std::string, std::string> GetPayoutStatus();
-
-  base::flat_map<std::string, mojom::RegionsPtr> GetWalletProviderRegions();
-
-  base::Time GetVBatDeadline();
-
-  bool GetVBatExpired();
-
   void SetServerPublisherListStamp(const uint64_t stamp);
 
   uint64_t GetServerPublisherListStamp();
@@ -91,7 +69,7 @@ class State {
   bool SetEncryptedString(const std::string& key, const std::string& value);
 
  private:
-  const raw_ref<RewardsEngineImpl> engine_;
+  const raw_ref<RewardsEngine> engine_;
   StateMigration migration_;
 };
 

@@ -46,6 +46,7 @@ import { fiatCurrencyEndpoints } from './endpoints/fiat_currency.endpoints'
 import { sitePermissionEndpoints } from './endpoints/site_permissions.endpoints'
 import { transactionEndpoints } from './endpoints/transaction.endpoints'
 import { swapEndpoints } from './endpoints/swap.endpoints'
+import { encryptionEndpoints } from './endpoints/encryption.endpoints'
 
 export function createWalletApi() {
   // base to add endpoints to
@@ -148,6 +149,8 @@ export function createWalletApi() {
       .injectEndpoints({ endpoints: sitePermissionEndpoints })
       // Brave Swap endpoints
       .injectEndpoints({ endpoints: swapEndpoints })
+      // Encryption endpoints
+      .injectEndpoints({ endpoints: encryptionEndpoints })
   )
 }
 
@@ -217,6 +220,8 @@ export const {
   useGetOnRampAssetsQuery,
   useGetOnRampFiatCurrenciesQuery,
   useGetPendingAddChainRequestQuery,
+  useGetPendingDecryptRequestQuery,
+  useGetPendingGetEncryptionPublicKeyRequestQuery,
   useGetPendingSwitchChainRequestQuery,
   useGetPendingTokenSuggestionRequestsQuery,
   useGetPriceHistoryQuery,
@@ -280,6 +285,8 @@ export const {
   useNewUnapprovedTxAddedMutation,
   useOpenPanelUIMutation,
   usePrefetch,
+  useProcessPendingDecryptRequestMutation,
+  useProcessPendingGetEncryptionPublicKeyRequestMutation,
   useRefreshNetworkInfoMutation,
   useRejectTransactionsMutation,
   useRemoveAccountMutation,

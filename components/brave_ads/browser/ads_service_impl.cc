@@ -294,7 +294,7 @@ void AdsServiceImpl::RegisterResourceComponentsForCurrentCountryCode() const {
   RegisterResourceComponentsForCountryCode(country_code);
 }
 
-bool AdsServiceImpl::UserHasOptedInToBraveRewards() const {
+bool AdsServiceImpl::UserHasJoinedBraveRewards() const {
   return profile_->GetPrefs()->GetBoolean(brave_rewards::prefs::kEnabled);
 }
 
@@ -342,9 +342,8 @@ void AdsServiceImpl::GetDeviceIdAndMaybeStartBatAdsServiceCallback(
 
 bool AdsServiceImpl::CanStartBatAdsService() const {
   return ShouldAlwaysRunService() || UserHasOptedInToBraveNewsAds() ||
-         (UserHasOptedInToBraveRewards() &&
-          (UserHasOptedInToNotificationAds() ||
-           UserHasOptedInToNewTabPageAds()));
+         (UserHasJoinedBraveRewards() && (UserHasOptedInToNotificationAds() ||
+                                          UserHasOptedInToNewTabPageAds()));
 }
 
 void AdsServiceImpl::MaybeStartBatAdsService() {
@@ -1105,7 +1104,7 @@ void AdsServiceImpl::SnoozeScheduledCaptcha() {
 void AdsServiceImpl::OnNotificationAdShown(const std::string& placement_id) {
   if (bat_ads_associated_remote_.is_bound()) {
     bat_ads_associated_remote_->TriggerNotificationAdEvent(
-        placement_id, mojom::NotificationAdEventType::kViewed,
+        placement_id, mojom::NotificationAdEventType::kViewedImpression,
         /*intentional*/ base::DoNothing());
   }
 }
@@ -1369,11 +1368,11 @@ void AdsServiceImpl::NotifyTabDidStopPlayingMedia(const int32_t tab_id) {
 
 void AdsServiceImpl::NotifyTabDidChange(const int32_t tab_id,
                                         const std::vector<GURL>& redirect_chain,
-                                        const int32_t http_response_status_code,
+                                        const bool is_error_page,
                                         const bool is_visible) {
   if (bat_ads_client_notifier_remote_.is_bound()) {
     bat_ads_client_notifier_remote_->NotifyTabDidChange(
-        tab_id, redirect_chain, http_response_status_code, is_visible);
+        tab_id, redirect_chain, is_error_page, is_visible);
   }
 }
 

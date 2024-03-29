@@ -54,6 +54,7 @@
 #include "brave/components/brave_rewards/common/features.h"
 #include "brave/components/brave_rewards/common/pref_names.h"
 #include "brave/components/brave_rewards/core/global_constants.h"
+#include "brave/components/brave_rewards/core/parameters/rewards_parameters_provider.h"
 #include "brave/components/brave_rewards/core/rewards_database.h"
 #include "brave/components/brave_rewards/resources/grit/brave_rewards_resources.h"
 #include "brave/components/brave_wallet/browser/json_rpc_service.h"
@@ -248,6 +249,15 @@ std::vector<std::string> GetISOCountries() {
     countries.emplace_back(*country_pointer);
   }
   return countries;
+}
+
+mojom::RewardsParametersPtr RewardsParametersFromPrefs(PrefService& prefs) {
+  auto params = internal::RewardsParametersProvider::DictToParameters(
+      prefs.GetDict(prefs::kParameters));
+  if (params) {
+    return params;
+  }
+  return mojom::RewardsParameters::New();
 }
 
 template <typename Callback, typename... Args>
@@ -521,7 +531,7 @@ void RewardsServiceImpl::CreateRewardsWallet(
 
         // Set the user's current ToS version.
         prefs->SetInteger(prefs::kTosVersion,
-                          prefs->GetInteger(prefs::kParametersTosVersion));
+                          RewardsParametersFromPrefs(*prefs)->tos_version);
 
         // Fetch the user's balance before turning on AC. We don't want to
         // automatically turn on AC if for some reason the user has a current
@@ -558,43 +568,19 @@ void RewardsServiceImpl::CreateRewardsWallet(
 
 void RewardsServiceImpl::GetUserType(
     base::OnceCallback<void(mojom::UserType)> callback) {
-  using mojom::UserType;
-
   if (!Connected()) {
     return DeferCallback(FROM_HERE, std::move(callback),
-                         UserType::kUnconnected);
+                         mojom::UserType::kUnconnected);
   }
 
-  auto on_external_wallet = [](base::WeakPtr<RewardsServiceImpl> self,
-                               base::OnceCallback<void(UserType)> callback,
-                               mojom::ExternalWalletPtr wallet) {
-    if (!self) {
-      std::move(callback).Run(UserType::kUnconnected);
-      return;
-    }
+  auto on_external_wallet =
+      [](base::OnceCallback<void(mojom::UserType)> callback,
+         mojom::ExternalWalletPtr wallet) {
+        std::move(callback).Run(wallet ? mojom::UserType::kConnected
+                                       : mojom::UserType::kUnconnected);
+      };
 
-    if (wallet) {
-      std::move(callback).Run(UserType::kConnected);
-      return;
-    }
-
-    auto* prefs = self->profile_->GetPrefs();
-    base::Version version(prefs->GetString(prefs::kUserVersion));
-    if (!version.IsValid()) {
-      version = base::Version({1});
-    }
-
-    if (!prefs->GetBoolean(prefs::kParametersVBatExpired) &&
-        version.CompareTo(base::Version({2, 5})) < 0) {
-      std::move(callback).Run(UserType::kLegacyUnconnected);
-      return;
-    }
-
-    std::move(callback).Run(UserType::kUnconnected);
-  };
-
-  GetExternalWallet(
-      base::BindOnce(on_external_wallet, AsWeakPtr(), std::move(callback)));
+  GetExternalWallet(base::BindOnce(on_external_wallet, std::move(callback)));
 }
 
 bool RewardsServiceImpl::IsTermsOfServiceUpdateRequired() {
@@ -602,7 +588,7 @@ bool RewardsServiceImpl::IsTermsOfServiceUpdateRequired() {
   if (!prefs->GetBoolean(prefs::kEnabled)) {
     return false;
   }
-  int params_version = prefs->GetInteger(prefs::kParametersTosVersion);
+  int params_version = RewardsParametersFromPrefs(*prefs)->tos_version;
   int user_version = prefs->GetInteger(prefs::kTosVersion);
   return user_version < params_version;
 }
@@ -610,7 +596,7 @@ bool RewardsServiceImpl::IsTermsOfServiceUpdateRequired() {
 void RewardsServiceImpl::AcceptTermsOfServiceUpdate() {
   if (IsTermsOfServiceUpdateRequired()) {
     auto* prefs = profile_->GetPrefs();
-    int params_version = prefs->GetInteger(prefs::kParametersTosVersion);
+    int params_version = RewardsParametersFromPrefs(*prefs)->tos_version;
     prefs->SetInteger(prefs::kTosVersion, params_version);
     for (auto& observer : observers_) {
       observer.OnTermsOfServiceUpdateAccepted();
@@ -2336,27 +2322,6 @@ void RewardsServiceImpl::GetClientInfo(GetClientInfoCallback callback) {
 #endif
 }
 
-void RewardsServiceImpl::GetMonthlyReport(
-    const uint32_t month,
-    const uint32_t year,
-    GetMonthlyReportCallback callback) {
-  if (!Connected()) {
-    return DeferCallback(FROM_HERE, std::move(callback), nullptr);
-  }
-
-  engine_->GetMonthlyReport(
-      static_cast<mojom::ActivityMonth>(month), year,
-      base::BindOnce(&RewardsServiceImpl::OnGetMonthlyReport, AsWeakPtr(),
-                     std::move(callback)));
-}
-
-void RewardsServiceImpl::OnGetMonthlyReport(
-    GetMonthlyReportCallback callback,
-    const mojom::Result result,
-    mojom::MonthlyReportInfoPtr report) {
-  std::move(callback).Run(std::move(report));
-}
-
 void RewardsServiceImpl::ReconcileStampReset() {
   for (auto& observer : observers_) {
     observer.ReconcileStampReset();
@@ -2382,16 +2347,6 @@ void RewardsServiceImpl::OnRunDBTransaction(
 void RewardsServiceImpl::ForTestingSetTestResponseCallback(
     const GetTestResponseCallback& callback) {
   test_response_callback_ = callback;
-}
-
-void RewardsServiceImpl::GetAllMonthlyReportIds(
-      GetAllMonthlyReportIdsCallback callback) {
-  if (!Connected()) {
-    return DeferCallback(FROM_HERE, std::move(callback),
-                         std::vector<std::string>());
-  }
-
-  engine_->GetAllMonthlyReportIds(std::move(callback));
 }
 
 void RewardsServiceImpl::GetAllContributions(

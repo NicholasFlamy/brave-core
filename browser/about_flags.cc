@@ -378,18 +378,9 @@
       kOsAndroid,                                                             \
       FEATURE_VALUE_TYPE(safe_browsing::features::kBraveAndroidSafeBrowsing), \
   })
-#define BRAVE_ZERO_DAY_FLAG_ANDROID                                        \
-  EXPAND_FEATURE_ENTRIES({                                                 \
-      "brave-zero-day-flag-android",                                       \
-      "ZeroDayFlag flag for product test",                                 \
-      "This flag will be set through griffin to perform product testing",  \
-      kOsAndroid,                                                          \
-      FEATURE_VALUE_TYPE(preferences::features::kBraveZeroDayFlagAndroid), \
-  })
 #else
 #define BRAVE_BACKGROUND_VIDEO_PLAYBACK_ANDROID
 #define BRAVE_SAFE_BROWSING_ANDROID
-#define BRAVE_ZERO_DAY_FLAG_ANDROID
 #endif  // BUILDFLAG(IS_ANDROID)
 
 #if !BUILDFLAG(IS_ANDROID)
@@ -415,6 +406,13 @@
           "Shows scroll bar on vertical tab strip when it overflows",     \
           kOsWin | kOsMac | kOsLinux,                                     \
           FEATURE_VALUE_TYPE(tabs::features::kBraveVerticalTabScrollBar), \
+      },                                                                  \
+      {                                                                   \
+          "brave-split-view",                                             \
+          "Enable split view",                                            \
+          "Enables split view",                                           \
+          kOsWin | kOsMac | kOsLinux,                                     \
+          FEATURE_VALUE_TYPE(tabs::features::kBraveSplitView),            \
       })
 #else
 #define BRAVE_TABS_FEATURE_ENTRIES
@@ -1006,7 +1004,6 @@
   BRAVE_COMMANDS_FEATURE_ENTRIES                                               \
   BRAVE_BACKGROUND_VIDEO_PLAYBACK_ANDROID                                      \
   BRAVE_SAFE_BROWSING_ANDROID                                                  \
-  BRAVE_ZERO_DAY_FLAG_ANDROID                                                  \
   BRAVE_CHANGE_ACTIVE_TAB_ON_SCROLL_EVENT_FEATURE_ENTRIES                      \
   BRAVE_TABS_FEATURE_ENTRIES                                                   \
   BRAVE_AI_CHAT                                                                \

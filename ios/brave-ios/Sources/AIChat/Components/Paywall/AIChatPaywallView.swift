@@ -9,6 +9,7 @@ import DesignSystem
 import StoreKit
 import SwiftUI
 import Then
+import os.log
 
 enum AIChatPaymentStatus {
   case ongoing
@@ -231,6 +232,8 @@ struct AIChatPaywallView: View {
       paymentStatus = .success
       shouldDismiss = true
     } catch {
+      Logger.module.debug("[AIChatPaywallView] - Purchase Failed: \(error)")
+
       paymentStatus = .failure
       isShowingPurchaseAlert = true
     }
@@ -314,9 +317,11 @@ private struct AIChatPremiumTierSelectionView: View {
               .font(.title)
               .foregroundColor(.white)
 
-              Text(" / " + Strings.AIChat.paywallYearlyPriceDividend)
-                .font(.subheadline)
-                .foregroundColor(Color(braveSystemName: .primitivePrimary30))
+              Text(
+                " / \(type == .monthly ? Strings.AIChat.paywallMonthlyPriceDividend : Strings.AIChat.paywallYearlyPriceDividend)"
+              )
+              .font(.subheadline)
+              .foregroundColor(Color(braveSystemName: .primitivePrimary30))
             }
           } else {
             ProgressView()

@@ -39,6 +39,7 @@
 #include "brave/browser/ui/brave_ui_features.h"
 #include "brave/browser/ui/webui/skus_internals_ui.h"
 #include "brave/components/ai_chat/core/common/buildflags/buildflags.h"
+#include "brave/components/body_sniffer/body_sniffer_throttle.h"
 #include "brave/components/brave_federated/features.h"
 #include "brave/components/brave_rewards/browser/rewards_protocol_navigation_throttle.h"
 #include "brave/components/brave_search/browser/brave_search_default_host.h"
@@ -66,7 +67,7 @@
 #include "brave/components/constants/webui_url_constants.h"
 #include "brave/components/cosmetic_filters/browser/cosmetic_filters_resources.h"
 #include "brave/components/cosmetic_filters/common/cosmetic_filters.mojom.h"
-#include "brave/components/de_amp/browser/de_amp_throttle.h"
+#include "brave/components/de_amp/browser/de_amp_body_handler.h"
 #include "brave/components/debounce/content/browser/debounce_navigation_throttle.h"
 #include "brave/components/decentralized_dns/content/decentralized_dns_navigation_throttle.h"
 #include "brave/components/google_sign_in_permission/google_sign_in_permission_throttle.h"
@@ -179,7 +180,6 @@ using extensions::ChromeContentBrowserClientExtensionsPart;
 #endif
 
 #if BUILDFLAG(ENABLE_TOR)
-#include "brave/browser/tor/onion_location_navigation_throttle_delegate.h"
 #include "brave/browser/tor/tor_profile_service_factory.h"
 #include "brave/components/tor/onion_location_navigation_throttle.h"
 #include "brave/components/tor/tor_navigation_throttle.h"
@@ -188,7 +188,8 @@ using extensions::ChromeContentBrowserClientExtensionsPart;
 #if BUILDFLAG(ENABLE_SPEEDREADER)
 #include "brave/browser/speedreader/speedreader_service_factory.h"
 #include "brave/browser/speedreader/speedreader_tab_helper.h"
-#include "brave/components/speedreader/speedreader_throttle.h"
+#include "brave/components/speedreader/speedreader_body_distiller.h"
+#include "brave/components/speedreader/speedreader_distilled_page_producer.h"
 #include "brave/components/speedreader/speedreader_util.h"
 #if !BUILDFLAG(IS_ANDROID)
 #include "brave/browser/ui/webui/speedreader/speedreader_toolbar_ui.h"
@@ -954,6 +955,10 @@ BraveContentBrowserClient::CreateURLLoaderThrottles(
         request.resource_type ==
         static_cast<int>(blink::mojom::ResourceType::kMainFrame);
 
+    auto body_sniffer_throttle =
+        std::make_unique<body_sniffer::BodySnifferThrottle>(
+            base::SingleThreadTaskRunner::GetCurrentDefault());
+
     // Speedreader
 #if BUILDFLAG(ENABLE_SPEEDREADER)
     auto* tab_helper =
@@ -962,25 +967,32 @@ BraveContentBrowserClient::CreateURLLoaderThrottles(
       auto* speedreader_service =
           speedreader::SpeedreaderServiceFactory::GetForBrowserContext(
               browser_context);
-      std::unique_ptr<speedreader::SpeedReaderThrottle> throttle =
-          speedreader::SpeedReaderThrottle::MaybeCreateThrottleFor(
-              g_brave_browser_process->speedreader_rewriter_service(),
-              speedreader_service, tab_helper->GetWeakPtr(), request.url,
-              base::SingleThreadTaskRunner::GetCurrentDefault());
-      if (throttle) {
-        result.push_back(std::move(throttle));
+
+      auto producer =
+          speedreader::SpeedreaderDistilledPageProducer::MaybeCreate(
+              tab_helper->GetWeakPtr());
+      if (producer) {
+        body_sniffer_throttle->SetBodyProducer(std::move(producer));
+      }
+
+      auto handler = speedreader::SpeedreaderBodyDistiller::MaybeCreate(
+          g_brave_browser_process->speedreader_rewriter_service(),
+          speedreader_service, tab_helper->GetWeakPtr());
+      if (handler) {
+        body_sniffer_throttle->AddHandler(std::move(handler));
       }
     }
 #endif  // ENABLE_SPEEDREADER
 
     if (isMainFrame) {
       // De-AMP
-      if (auto de_amp_throttle = de_amp::DeAmpThrottle::MaybeCreateThrottleFor(
-              base::SingleThreadTaskRunner::GetCurrentDefault(), request,
-              wc_getter)) {
-        result.push_back(std::move(de_amp_throttle));
+      auto handler = de_amp::DeAmpBodyHandler::Create(request, wc_getter);
+      if (handler) {
+        body_sniffer_throttle->AddHandler(std::move(handler));
       }
     }
+
+    result.push_back(std::move(body_sniffer_throttle));
 
     if (auto google_sign_in_permission_throttle =
             google_sign_in_permission::GoogleSignInPermissionThrottle::
@@ -1202,14 +1214,10 @@ BraveContentBrowserClient::CreateThrottlesForNavigation(
   if (tor_navigation_throttle) {
     throttles.push_back(std::move(tor_navigation_throttle));
   }
-  std::unique_ptr<tor::OnionLocationNavigationThrottleDelegate>
-      onion_location_navigation_throttle_delegate =
-          std::make_unique<tor::OnionLocationNavigationThrottleDelegate>();
   std::unique_ptr<content::NavigationThrottle>
       onion_location_navigation_throttle =
           tor::OnionLocationNavigationThrottle::MaybeCreateThrottleFor(
               handle, TorProfileServiceFactory::IsTorDisabled(context),
-              std::move(onion_location_navigation_throttle_delegate),
               context->IsTor());
   if (onion_location_navigation_throttle) {
     throttles.push_back(std::move(onion_location_navigation_throttle));

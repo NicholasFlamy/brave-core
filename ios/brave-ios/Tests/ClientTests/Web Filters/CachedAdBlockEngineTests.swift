@@ -136,18 +136,20 @@ final class CachedAdBlockEngineTests: XCTestCase {
             frameURL: url,
             isMainFrame: true,
             domain: domain,
+            isDeAmpEnabled: false,
             index: 0
           )
 
           // We should have no scripts injected
           XCTAssertEqual(sameDomainTypes.count, 0)
 
-          if engine.filterListInfo == textFilterListInfo {
+          if await engine.filterListInfo == textFilterListInfo {
             // This engine file contains some scriplet rules so we can test this part is working
             let crossDomainTypes = try await engine.makeEngineScriptTypes(
               frameURL: URL(string: "https://reddit.com")!,
               isMainFrame: true,
               domain: domain,
+              isDeAmpEnabled: false,
               index: 0
             )
             // We should have 1 engine script injected

@@ -46,7 +46,7 @@ public actor AdBlockStats {
 
   /// Handle memory warnings by freeing up some memory
   func didReceiveMemoryWarning() async {
-    cachedEngines.values.forEach({ $0.clearCaches() })
+    await cachedEngines.values.asyncForEach({ await $0.clearCaches() })
     await removeDisabledEngines()
   }
 
@@ -108,7 +108,10 @@ public actor AdBlockStats {
       filterListInfo: engine.filterListInfo,
       isAlwaysAggressive: engine.isAlwaysAggressive
     )
-    ContentBlockerManager.log.debug("Added engine for \(engine.filterListInfo.debugDescription)")
+    let typeString = engine.isAlwaysAggressive ? "aggressive" : "standard"
+    ContentBlockerManager.log.debug(
+      "Added \(typeString) engine for \(engine.filterListInfo.debugDescription)"
+    )
   }
 
   /// Add or update `filterListInfo` if it is a newer version. This information is used for lazy loading.
@@ -221,7 +224,7 @@ public actor AdBlockStats {
   ) async -> Bool {
     let sources = await self.enabledSources
     return await cachedEngines(for: sources).asyncConcurrentMap({ cachedEngine in
-      return cachedEngine.shouldBlock(
+      return await cachedEngine.shouldBlock(
         requestURL: requestURL,
         sourceURL: sourceURL,
         resourceType: resourceType,
@@ -234,6 +237,7 @@ public actor AdBlockStats {
   func makeEngineScriptTypes(
     frameURL: URL,
     isMainFrame: Bool,
+    isDeAmpEnabled: Bool,
     domain: Domain
   ) async -> Set<UserScriptType> {
     // Add any engine scripts for this frame
@@ -245,6 +249,7 @@ public actor AdBlockStats {
           frameURL: frameURL,
           isMainFrame: isMainFrame,
           domain: domain,
+          isDeAmpEnabled: isDeAmpEnabled,
           index: index
         )
       } catch {
@@ -280,7 +285,7 @@ public actor AdBlockStats {
     return await cachedEngines(for: domain).asyncConcurrentCompactMap {
       cachedEngine -> CosmeticFilterModelTuple? in
       do {
-        guard let model = try cachedEngine.cosmeticFilterModel(forFrameURL: frameURL) else {
+        guard let model = try await cachedEngine.cosmeticFilterModel(forFrameURL: frameURL) else {
           return nil
         }
         return (cachedEngine.isAlwaysAggressive, model)

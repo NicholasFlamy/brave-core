@@ -11,7 +11,7 @@ import os
 
 /// An object that wraps around an `AdblockEngine` and caches some results
 /// and ensures information is always returned on the correct thread on the engine.
-public class CachedAdBlockEngine {
+public actor CachedAdBlockEngine {
   public enum Source: Hashable, CustomDebugStringConvertible {
     case filterList(componentId: String, uuid: String)
     case filterListURL(uuid: String)
@@ -114,7 +114,10 @@ public class CachedAdBlockEngine {
     resourceType: AdblockEngine.ResourceType,
     isAggressiveMode: Bool
   ) -> Bool {
-    let key = [requestURL.absoluteString, sourceURL.absoluteString, resourceType.rawValue].joined(
+    let key = [
+      requestURL.absoluteString, sourceURL.absoluteString, resourceType.rawValue,
+      "\(isAggressiveMode)",
+    ].joined(
       separator: "_"
     )
 
@@ -134,10 +137,11 @@ public class CachedAdBlockEngine {
   }
 
   /// This returns all the user script types for the given frame
-  @MainActor func makeEngineScriptTypes(
+  func makeEngineScriptTypes(
     frameURL: URL,
     isMainFrame: Bool,
     domain: Domain,
+    isDeAmpEnabled: Bool,
     index: Int
   ) throws -> Set<UserScriptType> {
     if let userScriptTypes = cachedFrameScriptTypes.getElement(frameURL) {
@@ -154,7 +158,7 @@ public class CachedAdBlockEngine {
         isMainFrame: isMainFrame,
         source: source,
         order: index,
-        isDeAMPEnabled: Preferences.Shields.autoRedirectAMPPages.value
+        isDeAMPEnabled: isDeAmpEnabled
       )
 
       userScriptTypes.insert(.engineScript(configuration))

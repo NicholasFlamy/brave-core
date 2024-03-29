@@ -36,13 +36,13 @@
 #include "brave/components/brave_rewards/core/rewards_callbacks.h"
 
 namespace brave_rewards::internal {
-class RewardsEngineImpl;
+class RewardsEngine;
 
 namespace database {
 
 class Database {
  public:
-  explicit Database(RewardsEngineImpl& engine);
+  explicit Database(RewardsEngine& engine);
   virtual ~Database();
 
   void Initialize(ResultCallback callback);
@@ -103,10 +103,6 @@ class Database {
   void GetOneTimeTips(const mojom::ActivityMonth month,
                       const int year,
                       GetOneTimeTipsCallback callback);
-
-  void GetContributionReport(const mojom::ActivityMonth month,
-                             const int year,
-                             GetContributionReportCallback callback);
 
   void GetNotCompletedContributions(ContributionInfoListCallback callback);
 
@@ -310,7 +306,7 @@ class Database {
       GetUnblindedTokenListCallback callback);
 
  private:
-  const raw_ref<RewardsEngineImpl> engine_;
+  const raw_ref<RewardsEngine> engine_;
   DatabaseInitialize initialize_;
   DatabaseActivityInfo activity_info_;
   DatabaseBalanceReport balance_report_;

@@ -63,6 +63,8 @@ import { mockOriginInfo } from '../../../stories/mock-data/mock-origin-info'
 import { WalletApiDataOverrides } from '../../../constants/testing_types'
 import {
   mockAddChainRequest,
+  mockDecryptRequest,
+  mockGetEncryptionPublicKeyRequest,
   mockSwitchChainRequest
 } from '../../../stories/mock-data/mock-eth-requests'
 
@@ -214,6 +216,14 @@ export class MockedWalletApiProxy {
   private pendingAddChainRequests = [mockAddChainRequest]
   private pendingSwitchChainRequests: BraveWallet.SwitchChainRequest[] = [
     mockSwitchChainRequest
+  ]
+
+  private pendingDecryptRequests: BraveWallet.DecryptRequest[] = [
+    mockDecryptRequest
+  ]
+
+  private pendingEncryptionPublicKeyRequests = [
+    mockGetEncryptionPublicKeyRequest
   ]
 
   constructor(overrides?: WalletApiDataOverrides | undefined) {
@@ -408,6 +418,27 @@ export class MockedWalletApiProxy {
         getAssetIdKey(t) === tokenId ? { ...t, visible } : t
       )
       return { success: true }
+    },
+    getPendingDecryptRequests: async () => {
+      return {
+        requests: this.pendingDecryptRequests
+      }
+    },
+    notifyDecryptRequestProcessed: (requestId, approved) => {
+      this.pendingDecryptRequests = this.pendingDecryptRequests.filter(
+        (req) => req.requestId !== requestId
+      )
+    },
+    getPendingGetEncryptionPublicKeyRequests: async () => {
+      return {
+        requests: this.pendingEncryptionPublicKeyRequests
+      }
+    },
+    notifyGetPublicKeyRequestProcessed: (requestId, approved) => {
+      this.pendingEncryptionPublicKeyRequests =
+        this.pendingEncryptionPublicKeyRequests.filter(
+          (req) => req.requestId !== requestId
+        )
     }
   }
 

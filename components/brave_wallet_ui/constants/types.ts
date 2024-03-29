@@ -87,7 +87,6 @@ export type PanelHeaderSizes = 'regular' | 'slim'
 
 export type PanelTypes =
   | 'accounts'
-  | 'allowReadingEncryptedMessage' // For grep: 'decryptRequest'
   | 'approveTransaction'
   | 'assets'
   | 'buy'
@@ -97,10 +96,8 @@ export type PanelTypes =
   | 'expanded'
   | 'main'
   | 'networks'
-  | 'provideEncryptionKey' // For grep: 'getEncryptionPublicKey'
   | 'send'
   | 'settings'
-  | 'showUnlock'
   | 'signData'
   | 'signTransaction'
   | 'signAllTransactions'
@@ -186,8 +183,6 @@ export interface UIState {
   selectedPendingTransactionId?: string | undefined
   transactionProviderErrorRegistry: TransactionProviderErrorRegistry
   isPanel: boolean
-  collapsedPortfolioAccountIds: string[]
-  collapsedPortfolioNetworkKeys: string[]
 }
 
 export interface WalletState {
@@ -198,22 +193,11 @@ export interface WalletState {
   isWalletLocked: boolean
   addUserAssetError: boolean
   activeOrigin: BraveWallet.OriginInfo
-  selectedNetworkFilter: NetworkFilterType
-  selectedAssetFilter: string
-  selectedGroupAssetsByItem: string
-  selectedAccountFilter: string
   allowedNewWalletAccountTypeNetworkIds: EntityId[]
   passwordAttempts: number
   assetAutoDiscoveryCompleted: boolean
   isNftPinningFeatureEnabled: boolean
   isAnkrBalancesFeatureEnabled: boolean
-  hidePortfolioGraph: boolean
-  hidePortfolioBalances: boolean
-  hidePortfolioNFTsTab: boolean
-  filteredOutPortfolioNetworkKeys: string[]
-  filteredOutPortfolioAccountIds: string[]
-  hidePortfolioSmallBalances: boolean
-  showNetworkLogoOnNfts: boolean
   isRefreshingNetworksAndTokens: boolean
 }
 
@@ -225,10 +209,6 @@ export interface PanelState {
   signMessageData: BraveWallet.SignMessageRequest[]
   signTransactionRequests: BraveWallet.SignTransactionRequest[]
   signAllTransactionsRequests: BraveWallet.SignAllTransactionsRequest[]
-  getEncryptionPublicKeyRequest:
-    | BraveWallet.GetEncryptionPublicKeyRequest
-    | undefined
-  decryptRequest: BraveWallet.DecryptRequest | undefined
   hardwareWalletCode?: HardwareWalletResponseCodeType
   selectedTransactionId?: string
   signMessageErrorData: BraveWallet.SignMessageError[]
@@ -958,12 +938,26 @@ export type ERC721Metadata = {
   image_url?: string
 }
 
+export enum AddressMessageInfoIds {
+  sameAddressError = 0,
+  invalidAddressError = 1,
+  invalidUnifiedAddressError = 2,
+  invalidChecksumError = 3,
+  missingChecksumWarning = 4,
+  contractAddressError = 5,
+  FEVMTranslationWarning = 6,
+  ensOffchainLookupWarning = 7,
+  hasNoDomainAddress = 8,
+  invalidDomainExtension = 9
+}
+
 export type AddressMessageInfo = {
   title: string
   description?: string
   placeholder?: string
   url?: string
-  type?: 'error' | 'warning'
+  type?: 'error' | 'warning' | 'info'
+  id: AddressMessageInfoIds
 }
 
 export type AlertType = 'danger' | 'warning' | 'info' | 'success'

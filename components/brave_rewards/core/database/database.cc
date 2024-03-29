@@ -10,12 +10,12 @@
 
 #include "brave/components/brave_rewards/core/database/database_util.h"
 #include "brave/components/brave_rewards/core/logging/event_log_keys.h"
-#include "brave/components/brave_rewards/core/rewards_engine_impl.h"
+#include "brave/components/brave_rewards/core/rewards_engine.h"
 
 namespace brave_rewards::internal {
 namespace database {
 
-Database::Database(RewardsEngineImpl& engine)
+Database::Database(RewardsEngine& engine)
     : engine_(engine),
       initialize_(engine),
       activity_info_(engine),
@@ -142,12 +142,6 @@ void Database::GetOneTimeTips(const mojom::ActivityMonth month,
                               const int year,
                               GetOneTimeTipsCallback callback) {
   contribution_info_.GetOneTimeTips(month, year, std::move(callback));
-}
-
-void Database::GetContributionReport(const mojom::ActivityMonth month,
-                                     const int year,
-                                     GetContributionReportCallback callback) {
-  contribution_info_.GetContributionReport(month, year, std::move(callback));
 }
 
 void Database::GetNotCompletedContributions(

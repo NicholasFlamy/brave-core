@@ -1,6 +1,6 @@
 {
   "name": "brave-core",
-  "version": "1.66.27",
+  "version": "1.66.46",
   "description": "Brave Core is a set of changes, APIs and scripts used for customizing Chromium to make Brave.",
   "main": "index.js",
   "scripts": {
@@ -66,7 +66,7 @@
     "projects": {
       "chrome": {
         "dir": "src",
-        "tag": "123.0.6312.58",
+        "tag": "123.0.6312.86",
         "repository": {
           "url": "https://github.com/flamy-brave/brave-chromium-custom-sync"
         }
@@ -122,6 +122,7 @@
     "ethereumjs-util": "7.0.9",
     "file-loader": "6.2.0",
     "font-awesome": "4.7.0",
+    "fork-ts-checker-webpack-plugin": "9.0.2",
     "fs-extra": "8.1.0",
     "https-browserify": "1.0.0",
     "identity-obj-proxy": "3.0.0",
@@ -164,7 +165,7 @@
   },
   "dependencies": {
     "@brave/brave-ui": "0.40.4",
-    "@brave/leo": "github:brave/leo#3cd383209064c3971316d046427b1ce708fe8579",
+    "@brave/leo": "github:brave/leo#adbd7ca81aa7df671c7b16b7d111bef097d22fb9",
     "@brave/leo-sf-symbols": "github:brave/leo-sf-symbols#b667e73c79d1d5b4490eb2fa8925f0293b24c2f7",
     "@brave/react-virtualized-auto-sizer": "^1.0.4",
     "@brave/wallet-standard-brave": "0.0.12",

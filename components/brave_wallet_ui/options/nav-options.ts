@@ -16,7 +16,6 @@ import {
 
 const PANEL_TYPES: PanelTypes[] = [
   'accounts',
-  'allowReadingEncryptedMessage', // For grep: 'decryptRequest'
   'approveTransaction',
   'assets',
   'buy',
@@ -26,10 +25,8 @@ const PANEL_TYPES: PanelTypes[] = [
   'expanded',
   'main',
   'networks',
-  'provideEncryptionKey', // For grep: 'getEncryptionPublicKey'
   'send',
   'settings',
-  'showUnlock',
   'signData',
   'signTransaction',
   'signAllTransactions',

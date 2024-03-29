@@ -125,15 +125,15 @@ struct AssetDetailView: View {
     VStack(spacing: 16) {
       HStack(alignment: .top, spacing: 40) {
         if case .coinMarket(let coinMarket) = assetDetailStore.assetDetailType,
-          let depositableToken = assetDetailStore.convertCoinMarketToDepositableToken(
+          assetDetailStore.convertCoinMarketToDepositableToken(
             symbol: coinMarket.symbol
-          )
+          ) != nil
         {
           PortfolioHeaderButton(style: .deposit) {
             let destination = WalletActionDestination(
               kind: .deposit(query: coinMarket.symbol)
             )
-            if assetDetailStore.allAccountsForTokenCoin.isEmpty {
+            if assetDetailStore.allAccountsForToken.isEmpty {
               onAccountCreationNeeded(destination)
             } else {
               walletActionDestination = destination
@@ -230,7 +230,7 @@ struct AssetDetailView: View {
             kind: .buy,
             initialToken: assetDetailStore.assetDetailToken
           )
-          if assetDetailStore.allAccountsForTokenCoin.isEmpty {
+          if assetDetailStore.allAccountsForToken.isEmpty {
             onAccountCreationNeeded(destination)
           } else {
             walletActionDestination = destination
@@ -243,7 +243,7 @@ struct AssetDetailView: View {
             kind: .send,
             initialToken: assetDetailStore.assetDetailToken
           )
-          if assetDetailStore.allAccountsForTokenCoin.isEmpty {
+          if assetDetailStore.allAccountsForToken.isEmpty {
             onAccountCreationNeeded(destination)
           } else {
             walletActionDestination = destination
@@ -256,7 +256,7 @@ struct AssetDetailView: View {
             kind: .swap,
             initialToken: assetDetailStore.assetDetailToken
           )
-          if assetDetailStore.allAccountsForTokenCoin.isEmpty {
+          if assetDetailStore.allAccountsForToken.isEmpty {
             onAccountCreationNeeded(destination)
           } else {
             walletActionDestination = destination
@@ -274,7 +274,7 @@ struct AssetDetailView: View {
               kind: .deposit(query: nil),
               initialToken: assetDetailStore.assetDetailToken
             )
-            if assetDetailStore.allAccountsForTokenCoin.isEmpty {
+            if assetDetailStore.allAccountsForToken.isEmpty {
               onAccountCreationNeeded(destination)
             } else {
               walletActionDestination = destination
@@ -397,7 +397,7 @@ struct AssetDetailView: View {
                 kind: .deposit(query: nil),
                 initialToken: assetDetailStore.assetDetailToken
               )
-              if assetDetailStore.allAccountsForTokenCoin.isEmpty {
+              if assetDetailStore.allAccountsForToken.isEmpty {
                 onAccountCreationNeeded(destination)
               } else {
                 walletActionDestination = destination

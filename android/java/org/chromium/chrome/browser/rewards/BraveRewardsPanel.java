@@ -605,7 +605,7 @@ public class BraveRewardsPanel
                 && args.length > 0
                 && args[0].equals(SELF_CUSTODY_AVAILABLE)) {
             if (mBraveRewardsNativeWorker != null) {
-                mBraveRewardsNativeWorker.deleteNotification(mCurrentNotificationId);
+                mBraveRewardsNativeWorker.deleteNotification(id);
             }
             return;
         }
@@ -1091,10 +1091,7 @@ public class BraveRewardsPanel
 
     @Override
     public void onGetUserType(int userType) {
-        if (UserType.LEGACY_UNCONNECTED == userType
-                && mBraveRewardsNativeWorker.getVbatDeadline() > System.currentTimeMillis()) {
-            showVbatExpireNotice();
-        } else if (UserType.UNCONNECTED == userType) {
+        if (UserType.UNCONNECTED == userType) {
             newInstallViewChanges();
         }
     }
@@ -1294,7 +1291,8 @@ public class BraveRewardsPanel
         } else {
             existingUserViewChanges();
         }
-        if (mBraveRewardsNativeWorker.shouldShowSelfCustodyInvite()) {
+        if (mBraveRewardsNativeWorker.shouldShowSelfCustodyInvite()
+                && walletStatus == WalletStatus.NOT_CONNECTED) {
             showSolanaEligibleUi();
         }
     }

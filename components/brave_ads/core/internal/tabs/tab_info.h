@@ -16,8 +16,9 @@ namespace brave_ads {
 struct TabInfo final {
   TabInfo();
   TabInfo(int32_t id,
+          bool is_visible,
           std::vector<GURL> redirect_chain,
-          int32_t http_response_status_code,
+          bool is_error_page,
           bool is_playing_media);
 
   TabInfo(const TabInfo&);
@@ -31,8 +32,9 @@ struct TabInfo final {
   bool operator==(const TabInfo&) const = default;
 
   int32_t id = 0;
+  bool is_visible = false;
   std::vector<GURL> redirect_chain;
-  int32_t http_response_status_code = -1;
+  bool is_error_page = false;
   bool is_playing_media = false;
 };
 

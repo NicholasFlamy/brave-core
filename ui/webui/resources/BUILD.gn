@@ -183,6 +183,7 @@ leo_icons = [
   "cookie.svg",
   "content-big.svg",
   "copy-off.svg",
+  "copy-plain-text.svg",
   "copy.svg",
   "cpu-chip-off.svg",
   "cpu-chip.svg",
@@ -381,6 +382,7 @@ if (enable_brave_vpn_panel) {
     "country-jp.svg",
     "country-mx.svg",
     "country-nl.svg",
+    "country-se.svg",
     "country-sg.svg",
     "country-us.svg",
   ]
