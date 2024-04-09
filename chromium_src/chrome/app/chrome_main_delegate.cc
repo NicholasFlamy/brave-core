@@ -9,6 +9,7 @@
 
 #include "brave/app/brave_command_line_helper.cc"
 #include "brave/app/brave_main_delegate.cc"
+#include "brave/components/brave_sync/features.h"
 #include "brave/components/brave_sync/buildflags.h"
 #include "brave/components/variations/buildflags.h"
 #include "build/build_config.h"
@@ -44,6 +45,8 @@ void AdjustSyncServiceUrlForAndroid(std::string* brave_sync_service_url) {
       Java_BraveQAPreferences_isSyncStagingUsed(env);
   if (b_use_staging_sync_server) {
     *brave_sync_service_url = kBraveSyncServiceStagingURL;
+  } else if (kBraveSyncCustomURL != "") {
+    *brave_sync_service_url = kBraveSyncCustomURL;
   }
 }
 #endif  // BUILDFLAG(IS_ANDROID)
