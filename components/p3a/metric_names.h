@@ -32,10 +32,14 @@ inline constexpr auto kCollectedTypicalHistograms =
     "Brave.AIChat.ContextMenu.MostUsedAction",
     "Brave.AIChat.ContextMenu.PremiumUsages",
     "Brave.AIChat.Enabled.2",
+    "Brave.AIChat.Enabled.SidebarEnabledA",
+    "Brave.AIChat.Enabled.SidebarEnabledB",
     "Brave.AIChat.NewUserReturning",
     "Brave.AIChat.OmniboxOpens",
     "Brave.AIChat.OmniboxWeekCompare",
     "Brave.AIChat.UsageWeekly",
+    "Brave.AIChat.UsageWeekly.SidebarEnabledA",
+    "Brave.AIChat.UsageWeekly.SidebarEnabledB",
     "Brave.Core.BookmarksCountOnProfileLoad.2",
     "Brave.Core.CrashReportsEnabled",
     "Brave.Core.DomainsLoaded",
@@ -173,6 +177,8 @@ inline constexpr auto kCollectedTypicalHistograms =
     "Brave.Shields.FingerprintBlockSetting",
     "Brave.Shields.UsageStatus",
     "Brave.Sidebar.Enabled",
+    "Brave.Sidebar.SettingChange.SidebarEnabledA",
+    "Brave.Sidebar.SettingChange.SidebarEnabledB",
     "Brave.SpeedReader.Enabled",
     "Brave.SpeedReader.ToggleCount",
     "Brave.Sync.ProgressTokenEverReset",
@@ -256,9 +262,11 @@ inline constexpr auto kCollectedSlowHistograms =
 inline constexpr auto kCollectedExpressHistograms =
   base::MakeFixedFlatSet<std::string_view>(base::sorted_unique,{
     "Brave.AIChat.UsageDaily.2",
+    "Brave.AIChat.UsageDaily.SidebarEnabledA",
+    "Brave.AIChat.UsageDaily.SidebarEnabledB",
     "Brave.Core.UsageDaily",
-    "Brave.DayZero.Off.InstallTime",
-    "Brave.DayZero.On.InstallTime",
+    "Brave.DayZero.A.InstallTime",
+    "Brave.DayZero.B.InstallTime",
     "Brave.Rewards.EnabledInstallationTime",
     "Brave.Search.DefaultEngine.4",
     "Brave.Today.IsEnabled",
@@ -283,8 +291,12 @@ inline constexpr auto kEphemeralHistograms =
     "Brave.AIChat.OmniboxOpens",
     "Brave.AIChat.OmniboxWeekCompare",
     "Brave.AIChat.UsageDaily.2",
+    "Brave.AIChat.UsageDaily.SidebarEnabledA",
+    "Brave.AIChat.UsageDaily.SidebarEnabledB",
     "Brave.AIChat.UsageMonthly",
     "Brave.AIChat.UsageWeekly",
+    "Brave.AIChat.UsageWeekly.SidebarEnabledA",
+    "Brave.AIChat.UsageWeekly.SidebarEnabledB",
     "Brave.Core.FailedHTTPSUpgrades",
     "Brave.DayZero.Off.InstallTime",
     "Brave.DayZero.On.InstallTime",
@@ -329,16 +341,16 @@ inline constexpr auto kEphemeralHistograms =
 inline constexpr auto kConstellationOnlyHistograms =
   base::MakeFixedFlatSet<std::string_view>(base::sorted_unique,{
     "Brave.Core.PrimaryLang",
-    "Brave.DayZero.Off.InstallTime",
-    "Brave.DayZero.On.InstallTime",
+    "Brave.DayZero.A.InstallTime",
+    "Brave.DayZero.B.InstallTime",
 });
 
 // List of metrics which will include the stored refcode when transmitted
 // via the STAR/Constellation protocol.
 inline constexpr auto kHistogramsWithRefcodeIncluded =
   base::MakeFixedFlatSet<std::string_view>(base::sorted_unique,{
-    "Brave.DayZero.Off.InstallTime",
-    "Brave.DayZero.On.InstallTime",
+    "Brave.DayZero.A.InstallTime",
+    "Brave.DayZero.B.InstallTime",
 });
 
 // clang-format on

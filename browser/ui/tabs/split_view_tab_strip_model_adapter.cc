@@ -5,7 +5,9 @@
 
 #include "brave/browser/ui/tabs/split_view_tab_strip_model_adapter.h"
 
+#include "base/compiler_specific.h"
 #include "base/memory/weak_ptr.h"
+#include "base/ranges/algorithm.h"
 #include "base/task/sequenced_task_runner.h"
 #include "brave/browser/ui/tabs/features.h"
 #include "chrome/browser/ui/tabs/tab_model.h"
@@ -15,9 +17,8 @@
 SplitViewTabStripModelAdapter::SplitViewTabStripModelAdapter(
     SplitViewBrowserData& split_view_browser_data,
     TabStripModel* model)
-    : split_view_browser_data_(split_view_browser_data), model_(model) {
+    : split_view_browser_data_(split_view_browser_data), model_(*model) {
   CHECK(base::FeatureList::IsEnabled(tabs::features::kBraveSplitView));
-  CHECK(model);
 
   model_->AddObserver(this);
 }
@@ -25,7 +26,7 @@ SplitViewTabStripModelAdapter::SplitViewTabStripModelAdapter(
 SplitViewTabStripModelAdapter::~SplitViewTabStripModelAdapter() = default;
 
 void SplitViewTabStripModelAdapter::MakeTiledTabsAdjacent(
-    SplitViewBrowserData::Tile tile,
+    const SplitViewBrowserData::Tile& tile,
     bool move_right_tab) {
   auto [tab1, tab2] = tile;
   auto index1 = model_->GetIndexOfTab(tab1);
@@ -43,10 +44,45 @@ void SplitViewTabStripModelAdapter::MakeTiledTabsAdjacent(
   }
 }
 
+void SplitViewTabStripModelAdapter::TabDragStarted() {
+  if (split_view_browser_data_->tiles().empty() || is_in_tab_dragging()) {
+    return;
+  }
+
+  is_in_tab_dragging_ = true;
+}
+
+void SplitViewTabStripModelAdapter::TabDragEnded() {
+  // Check if any tiles are separated after drag and drop session. Then break
+  // the tiles.
+  std::vector<SplitViewBrowserData::Tile> tiles_to_break;
+  for (const auto& tile : split_view_browser_data_->tiles()) {
+    auto [tab1, tab2] = tile;
+    int index1 = model_->GetIndexOfTab(tab1);
+    int index2 = model_->GetIndexOfTab(tab2);
+    if (index2 - index1 == 1) {
+      return;
+    }
+
+    tiles_to_break.push_back(tile);
+  }
+
+  while (!tiles_to_break.empty()) {
+    split_view_browser_data_->BreakTile(tiles_to_break.back().first);
+    tiles_to_break.pop_back();
+  }
+
+  is_in_tab_dragging_ = false;
+}
+
 void SplitViewTabStripModelAdapter::OnTabStripModelChanged(
     TabStripModel* tab_strip_model,
     const TabStripModelChange& change,
     const TabStripSelectionChange& selection) {
+  if (split_view_browser_data_->tiles().empty()) {
+    return;
+  }
+
   switch (change.type()) {
     case TabStripModelChange::kInserted:
       OnTabInserted(change.GetInsert());
@@ -64,8 +100,8 @@ void SplitViewTabStripModelAdapter::OnTabStripModelChanged(
 
 void SplitViewTabStripModelAdapter::OnTabInserted(
     const TabStripModelChange::Insert* insert) {
-  // For simplicity, we just break tiles in case tabs are inserted between tiled
-  // tabs.
+  // When tabs are inserted between tiles, we'll move it after the tile.
+  // This can happen when the inserted tabs were created from tile.first.
 
   // Indices of tabs are at the time of insertion, so we need to adjust them.
   std::vector<int> inserted_indices;
@@ -79,23 +115,40 @@ void SplitViewTabStripModelAdapter::OnTabInserted(
     inserted_indices.push_back(contents_with_index.index);
   }
 
-  // Find tiles that need to be broken
-  std::vector<tabs::TabHandle> tiles_to_break;
-  for (const auto& [tab1, tab2] : split_view_browser_data_->tiles({})) {
+  std::vector<int> indices_to_be_moved;
+  for (const auto& [tab1, tab2] : split_view_browser_data_->tiles()) {
     auto lower_index = model_->GetIndexOfTab(tab1);
     auto higher_index = model_->GetIndexOfTab(tab2);
     CHECK_LT(lower_index, higher_index);
 
     for (auto inserted_index : inserted_indices) {
       if (lower_index < inserted_index && inserted_index < higher_index) {
-        tiles_to_break.emplace_back(tab1);
+        indices_to_be_moved.push_back(inserted_index);
         break;
       }
     }
   }
 
-  for (const auto& tab : tiles_to_break) {
-    split_view_browser_data_->BreakTile(tab);
+  for (auto index : indices_to_be_moved) {
+    base::SequencedTaskRunner::GetCurrentDefault()->PostTask(
+        FROM_HERE,
+        base::BindOnce(
+            [](base::WeakPtr<SplitViewTabStripModelAdapter> adapter,
+               tabs::TabHandle tab, int index) {
+              if (!adapter) {
+                return;
+              }
+
+              if (UNLIKELY(index != adapter->model_->GetIndexOfTab(tab))) {
+                // Index changed. Cancel the move.
+                return;
+              }
+
+              adapter->model_->MoveWebContentsAt(index, index + 1,
+                                                 /*select_after_move*/ false);
+            },
+            weak_ptr_factory_.GetWeakPtr(), model_->GetTabHandleAt(index),
+            index));
   }
 
   // TODO(sko) There're a few more things to consider
@@ -122,9 +175,6 @@ void SplitViewTabStripModelAdapter::OnTabMoved(
       FROM_HERE,
       base::BindOnce(&SplitViewTabStripModelAdapter::MakeTiledTabsAdjacent,
                      weak_ptr_factory_.GetWeakPtr(), *tile, move_right_tab));
-
-  // TODO(sko) We should make sure that tab isn't moved between tiled tabs.
-  // Or we should break the tile when it happens.
 }
 
 void SplitViewTabStripModelAdapter::OnTabWillBeRemoved(

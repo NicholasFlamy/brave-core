@@ -19,6 +19,7 @@
 #include "brave/browser/speedreader/page_distiller.h"
 #include "brave/browser/speedreader/speedreader_service_factory.h"
 #include "brave/browser/speedreader/speedreader_tab_helper.h"
+#include "brave/browser/ui/page_action/brave_page_action_icon_type.h"
 #include "brave/browser/ui/views/frame/brave_browser_view.h"
 #include "brave/browser/ui/webui/speedreader/speedreader_toolbar_data_handler_impl.h"
 #include "brave/components/ai_chat/core/common/buildflags/buildflags.h"
@@ -173,7 +174,7 @@ class SpeedReaderBrowserTest : public InProcessBrowserTest {
   PageActionIconView* GetReaderButton() {
     return BrowserView::GetBrowserViewForBrowser(browser())
         ->toolbar_button_provider()
-        ->GetPageActionIconView(PageActionIconType::kReaderMode);
+        ->GetPageActionIconView(brave::kSpeedreaderPageActionIconType);
   }
 
   void WaitDistilled(speedreader::SpeedreaderTabHelper* th = nullptr) {
@@ -1000,5 +1001,10 @@ IN_PROC_BROWSER_TEST_F(SpeedReaderBrowserTest, OnDemandReaderEnableForSite) {
   WaitDistilled();
 
   EXPECT_TRUE(speedreader::DistillStates::IsDistilled(
+      tab_helper()->PageDistillState()));
+
+  // Go to home page.
+  NavigateToPageSynchronously("/", WindowOpenDisposition::CURRENT_TAB);
+  EXPECT_TRUE(speedreader::DistillStates::IsViewOriginal(
       tab_helper()->PageDistillState()));
 }

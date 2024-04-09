@@ -26,6 +26,7 @@
 #include "brave/components/ai_chat/core/browser/engine/engine_consumer_claude.h"
 #include "brave/components/ai_chat/core/browser/engine/engine_consumer_llama.h"
 #include "brave/components/ai_chat/core/browser/models.h"
+#include "brave/components/ai_chat/core/browser/utils.h"
 #include "brave/components/ai_chat/core/common/features.h"
 #include "brave/components/ai_chat/core/common/mojom/ai_chat.mojom-shared.h"
 #include "brave/components/ai_chat/core/common/mojom/ai_chat.mojom.h"
@@ -91,6 +92,13 @@ GetActionTypeQuestionMap() {
            {mojom::ActionType::EXPAND,
             l10n_util::GetStringUTF8(IDS_AI_CHAT_QUESTION_EXPAND)}});
   return *map;
+}
+
+const std::string& GetActionTypeQuestion(mojom::ActionType action_type) {
+  const auto& map = GetActionTypeQuestionMap();
+  auto iter = map.find(action_type);
+  CHECK(iter != map.end());
+  return iter->second;
 }
 
 }  // namespace
@@ -301,18 +309,11 @@ void ConversationDriver::InitEngine() {
 }
 
 bool ConversationDriver::HasUserOptedIn() {
-  base::Time last_accepted_disclaimer =
-        pref_service_->GetTime(ai_chat::prefs::kLastAcceptedDisclaimer);
-  return !last_accepted_disclaimer.is_null();
+  return ::ai_chat::HasUserOptedIn(pref_service_);
 }
 
 void ConversationDriver::SetUserOptedIn(bool user_opted_in) {
-  if (user_opted_in) {
-    pref_service_->SetTime(ai_chat::prefs::kLastAcceptedDisclaimer,
-                           base::Time::Now());
-  } else {
-    pref_service_->ClearPref(ai_chat::prefs::kLastAcceptedDisclaimer);
-  }
+  ::ai_chat::SetUserOptedIn(pref_service_, user_opted_in);
 }
 
 void ConversationDriver::OnUserOptedIn() {
@@ -601,6 +602,20 @@ mojom::APIError ConversationDriver::GetCurrentAPIError() {
   return current_error_;
 }
 
+mojom::ConversationTurnPtr ConversationDriver::ClearErrorAndGetFailedMessage() {
+  DCHECK(!chat_history_.empty());
+
+  SetAPIError(mojom::APIError::None);
+  mojom::ConversationTurnPtr turn = chat_history_.back().Clone();
+  chat_history_.pop_back();
+
+  for (auto& obs : observers_) {
+    obs.OnHistoryUpdate();
+  }
+
+  return turn;
+}
+
 void ConversationDriver::GenerateQuestions() {
   DVLOG(1) << __func__;
   // This function should not be presented in the UI if the user has not
@@ -683,16 +698,43 @@ void ConversationDriver::MaybeUnlinkPageContent() {
   }
 }
 
-void ConversationDriver::SubmitSelectedText(const std::string& selected_text,
-                                            mojom::ActionType action_type) {
-  const auto& action_type_question_map = GetActionTypeQuestionMap();
-  auto iter = action_type_question_map.find(action_type);
-  DCHECK(iter != action_type_question_map.end());
-
+void ConversationDriver::AddSubmitSelectedTextError(
+    const std::string& selected_text,
+    mojom::ActionType action_type,
+    mojom::APIError error) {
+  if (error == mojom::APIError::None) {
+    return;
+  }
+  const std::string& question = GetActionTypeQuestion(action_type);
   mojom::ConversationTurn turn = {CharacterType::HUMAN, action_type,
-                                  ConversationTurnVisibility::VISIBLE,
-                                  iter->second, selected_text};
-  SubmitHumanConversationEntry(turn);
+                                  ConversationTurnVisibility::VISIBLE, question,
+                                  selected_text};
+  AddToConversationHistory(std::move(turn));
+  SetAPIError(error);
+}
+
+void ConversationDriver::SubmitSelectedText(
+    const std::string& selected_text,
+    mojom::ActionType action_type,
+    EngineConsumer::GenerationDataCallback received_callback,
+    EngineConsumer::GenerationCompletedCallback completed_callback) {
+  const std::string& question = GetActionTypeQuestion(action_type);
+
+  if (received_callback && completed_callback) {
+    // Start a one-off request and replace in-place with the result.
+    engine_->GenerateRewriteSuggestion(selected_text, question,
+                                       std::move(received_callback),
+                                       std::move(completed_callback));
+  } else if (!received_callback && !completed_callback) {
+    // Use sidebar.
+    mojom::ConversationTurn turn = {CharacterType::HUMAN, action_type,
+                                    ConversationTurnVisibility::VISIBLE,
+                                    question, selected_text};
+
+    SubmitHumanConversationEntry(turn);
+  } else {
+    NOTREACHED_NORETURN() << "Both callbacks must be set or unset";
+  }
 }
 
 void ConversationDriver::SubmitHumanConversationEntry(
@@ -1027,7 +1069,7 @@ void ConversationDriver::RateMessage(
           std::move(callback).Run(id);
           return;
         }
-        std::move(callback).Run(absl::nullopt);
+        std::move(callback).Run(std::nullopt);
       },
       std::move(callback));
 
@@ -1050,7 +1092,7 @@ void ConversationDriver::RateMessage(
     return;
   }
 
-  std::move(callback).Run(absl::nullopt);
+  std::move(callback).Run(std::nullopt);
 }
 
 void ConversationDriver::SendFeedback(

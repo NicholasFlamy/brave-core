@@ -17,14 +17,10 @@ import {
 import {
   ShowConnectToSitePayload,
   SignMessageProcessedPayload,
-  SignAllTransactionsProcessedPayload,
-  SignTransactionHardwarePayload,
-  SignAllTransactionsHardwarePayload,
   SignMessageHardwarePayload
 } from '../constants/action_types'
 import {
   signMessageWithHardwareKeyring,
-  signRawTransactionWithHardwareKeyring,
   cancelHardwareOperation,
   dialogErrorFromLedgerErrorCode,
   dialogErrorFromTrezorErrorCode
@@ -70,28 +66,6 @@ async function getPendingSignMessageErrors() {
   const errors = (await braveWalletService.getPendingSignMessageErrors()).errors
   if (errors && errors.length) {
     return errors
-  }
-  return null
-}
-
-async function getPendingSignTransactionRequests() {
-  const { braveWalletService } = getWalletPanelApiProxy()
-  const { requests } =
-    await braveWalletService.getPendingSignTransactionRequests()
-
-  if (requests && requests.length) {
-    return requests
-  }
-  return null
-}
-
-async function getPendingSignAllTransactionsRequests() {
-  const { braveWalletService } = getWalletPanelApiProxy()
-  const { requests } =
-    await braveWalletService.getPendingSignAllTransactionsRequests()
-
-  if (requests && requests.length) {
-    return requests
   }
   return null
 }
@@ -204,6 +178,7 @@ function toByteArrayStringUnion<
   return Object.assign({}, unionItem) as BraveWallet.ByteArrayStringUnion
 }
 
+// Sign Message Hardware
 handler.on(
   PanelActions.signMessageHardware.type,
   async (store, messageData: SignMessageHardwarePayload) => {
@@ -299,199 +274,8 @@ handler.on(
 )
 
 // Sign Transaction
-handler.on(
-  PanelActions.signTransaction.type,
-  async (store: Store, payload: BraveWallet.SignTransactionRequest[]) => {
-    store.dispatch(PanelActions.navigateTo('signTransaction'))
-    const { panelHandler } = getWalletPanelApiProxy()
-    panelHandler.showUI()
-  }
-)
 
-handler.on(
-  PanelActions.signTransactionHardware.type,
-  async (store, messageData: SignTransactionHardwarePayload) => {
-    const apiProxy = getWalletPanelApiProxy()
-    if (!isHardwareAccount(messageData.account.accountId)) {
-      const braveWalletService = apiProxy.braveWalletService
-      braveWalletService.notifySignTransactionRequestProcessed(
-        false,
-        messageData.request.id,
-        null,
-        getLocale('braveWalletHardwareAccountNotFound')
-      )
-      const requests = await getPendingSignTransactionRequests()
-      if (requests) {
-        store.dispatch(PanelActions.signTransaction(requests))
-        return
-      }
-      apiProxy.panelHandler.closeUI()
-      return
-    }
-
-    await navigateToConnectHardwareWallet(store)
-    const coin = messageData.account.accountId.coin
-    const info = messageData.account.hardware
-    assert(info)
-
-    const signed = await signRawTransactionWithHardwareKeyring(
-      info.vendor as HardwareVendor,
-      info.path,
-      messageData.request.rawMessage,
-      coin,
-      () => {
-        store.dispatch(PanelActions.signTransaction([messageData.request]))
-      }
-    )
-    if (signed?.code === 'unauthorized') {
-      await store.dispatch(
-        PanelActions.setHardwareWalletInteractionError(signed.code)
-      )
-      return
-    }
-    let signature: BraveWallet.ByteArrayStringUnion | undefined
-    if (signed.success) {
-      signature =
-        coin === BraveWallet.CoinType.SOL
-          ? toByteArrayStringUnion({ bytes: [...(signed.payload as Buffer)] })
-          : toByteArrayStringUnion({ str: signed.payload as string })
-    }
-
-    const payload: SignMessageProcessedPayload = signed.success
-      ? {
-          approved: signed.success,
-          id: messageData.request.id,
-          signature: signature
-        }
-      : {
-          approved: signed.success,
-          id: messageData.request.id,
-          error: signed.error as string | undefined
-        }
-    store.dispatch(PanelActions.signTransactionProcessed(payload))
-    await store.dispatch(PanelActions.navigateToMain())
-    apiProxy.panelHandler.closeUI()
-  }
-)
-
-handler.on(
-  PanelActions.signTransactionProcessed.type,
-  async (store: Store, payload: SignMessageProcessedPayload) => {
-    const { braveWalletService, panelHandler } = getWalletPanelApiProxy()
-    braveWalletService.notifySignTransactionRequestProcessed(
-      payload.approved,
-      payload.id,
-      payload.signature || null,
-      payload.error || null
-    )
-    const requests = await getPendingSignTransactionRequests()
-    if (requests) {
-      store.dispatch(PanelActions.signTransaction(requests))
-      return
-    }
-    panelHandler.closeUI()
-  }
-)
-
-// Sign All Transactions
-handler.on(
-  PanelActions.signAllTransactions.type,
-  async (store: Store, payload: BraveWallet.SignAllTransactionsRequest[]) => {
-    store.dispatch(PanelActions.navigateTo('signAllTransactions'))
-    const apiProxy = getWalletPanelApiProxy()
-    apiProxy.panelHandler.showUI()
-  }
-)
-
-handler.on(
-  PanelActions.signAllTransactionsHardware.type,
-  async (store, messageData: SignAllTransactionsHardwarePayload) => {
-    const apiProxy = getWalletPanelApiProxy()
-    if (!isHardwareAccount(messageData.account.accountId)) {
-      const braveWalletService = apiProxy.braveWalletService
-      braveWalletService.notifySignAllTransactionsRequestProcessed(
-        false,
-        messageData.request.id,
-        null,
-        getLocale('braveWalletHardwareAccountNotFound')
-      )
-      const requests = await getPendingSignAllTransactionsRequests()
-      if (requests) {
-        store.dispatch(PanelActions.signAllTransactions(requests))
-        return
-      }
-      apiProxy.panelHandler.closeUI()
-      return
-    }
-
-    await navigateToConnectHardwareWallet(store)
-    const coin = messageData.account.accountId.coin
-    const info = messageData.account.hardware
-    assert(info)
-
-    // Send serialized requests to hardware keyring to sign.
-    const payload: SignAllTransactionsProcessedPayload = {
-      approved: true,
-      id: messageData.request.id,
-      signatures: []
-    }
-    for (const rawMessage of messageData.request.rawMessages) {
-      const signed = await signRawTransactionWithHardwareKeyring(
-        info.vendor as HardwareVendor,
-        info.path,
-        rawMessage,
-        coin,
-        () => {
-          store.dispatch(
-            PanelActions.signAllTransactions([messageData.request])
-          )
-        }
-      )
-
-      if (!signed.success) {
-        if (signed.code && signed.code === 'unauthorized') {
-          await store.dispatch(
-            PanelActions.setHardwareWalletInteractionError(signed.code)
-          )
-          return
-        }
-        payload.approved = false
-        payload.signatures = undefined
-        payload.error = signed.error as string
-        break
-      }
-      const signature: BraveWallet.ByteArrayStringUnion =
-        coin === BraveWallet.CoinType.SOL
-          ? toByteArrayStringUnion({ bytes: [...(signed.payload as Buffer)] })
-          : toByteArrayStringUnion({ str: signed.payload as string })
-      payload.signatures?.push(signature)
-    }
-
-    store.dispatch(PanelActions.signAllTransactionsProcessed(payload))
-    await store.dispatch(PanelActions.navigateToMain())
-    apiProxy.panelHandler.closeUI()
-  }
-)
-
-handler.on(
-  PanelActions.signAllTransactionsProcessed.type,
-  async (store: Store, payload: SignAllTransactionsProcessedPayload) => {
-    const { braveWalletService, panelHandler } = getWalletPanelApiProxy()
-    braveWalletService.notifySignAllTransactionsRequestProcessed(
-      payload.approved,
-      payload.id,
-      payload.signatures || null,
-      payload.error || null
-    )
-    const requests = await getPendingSignAllTransactionsRequests()
-    if (requests) {
-      store.dispatch(PanelActions.signAllTransactions(requests))
-      return
-    }
-    panelHandler.closeUI()
-  }
-)
-
+// Sign Message
 handler.on(PanelActions.signMessageError.type, async (store: Store) => {
   const { panelHandler } = getWalletPanelApiProxy()
   panelHandler.showUI()
@@ -555,21 +339,6 @@ handler.on(WalletActions.initialize.type, async (store) => {
     store.dispatch(PanelActions.showConnectToSite({ accounts, originInfo }))
     return
   } else {
-    const signTransactionRequests = await getPendingSignTransactionRequests()
-    if (signTransactionRequests) {
-      store.dispatch(PanelActions.signTransaction(signTransactionRequests))
-      return
-    }
-
-    const signAllTransactionsRequests =
-      await getPendingSignAllTransactionsRequests()
-    if (signAllTransactionsRequests) {
-      store.dispatch(
-        PanelActions.signAllTransactions(signAllTransactionsRequests)
-      )
-      return
-    }
-
     const signMessageRequests = await getPendingSignMessageRequests()
     if (signMessageRequests) {
       store.dispatch(PanelActions.signMessage(signMessageRequests))

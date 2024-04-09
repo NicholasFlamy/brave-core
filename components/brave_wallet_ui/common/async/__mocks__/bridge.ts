@@ -11,7 +11,7 @@ import { createStore, combineReducers } from 'redux'
 import { createWalletReducer } from '../../slices/wallet.slice'
 
 // types
-import { BraveWallet } from '../../../constants/types'
+import { BraveWallet, CommonNftMetadata } from '../../../constants/types'
 import { WalletActions } from '../../actions'
 import type WalletApiProxy from '../../wallet_api_proxy'
 
@@ -54,7 +54,6 @@ import {
 } from '../../../stories/mock-data/mock-transaction-info'
 import { blockchainTokenEntityAdaptor } from '../../slices/entities/blockchain-token.entity'
 import { findAccountByUniqueKey } from '../../../utils/account-utils'
-import { CommonNftMetadata } from '../../slices/endpoints/nfts.endpoints'
 import { mockNFTMetadata } from '../../../stories/mock-data/mock-nft-metadata'
 import {
   coinMarketMockData //
@@ -226,6 +225,11 @@ export class MockedWalletApiProxy {
     mockGetEncryptionPublicKeyRequest
   ]
 
+  private signTransactionRequests: BraveWallet.SignTransactionRequest[] = []
+
+  private signAllTransactionsRequests =
+    [] as BraveWallet.SignAllTransactionsRequest[]
+
   constructor(overrides?: WalletApiDataOverrides | undefined) {
     this.applyOverrides(overrides)
   }
@@ -255,6 +259,10 @@ export class MockedWalletApiProxy {
       overrides.svmSimulationResponse ?? this.svmSimulationResponse
     this.txSimulationOptInStatus =
       overrides.simulationOptInStatus ?? this.txSimulationOptInStatus
+    this.signTransactionRequests =
+      overrides.signTransactionRequests ?? this.signTransactionRequests
+    this.signAllTransactionsRequests =
+      overrides.signAllTransactionsRequests ?? this.signAllTransactionsRequests
   }
 
   assetsRatioService: Partial<
@@ -439,6 +447,30 @@ export class MockedWalletApiProxy {
         this.pendingEncryptionPublicKeyRequests.filter(
           (req) => req.requestId !== requestId
         )
+    },
+    getPendingSignTransactionRequests: async () => {
+      return {
+        requests: this.signTransactionRequests
+      }
+    },
+    getPendingSignAllTransactionsRequests: async () => {
+      return {
+        requests: this.signAllTransactionsRequests
+      }
+    },
+    notifySignTransactionRequestProcessed: (approved, id, signature, error) => {
+      this.signTransactionRequests = this.signTransactionRequests.filter(
+        (req) => req.id !== id
+      )
+    },
+    notifySignAllTransactionsRequestProcessed: (
+      approved,
+      id,
+      signatures,
+      error
+    ) => {
+      this.signAllTransactionsRequests =
+        this.signAllTransactionsRequests.filter((req) => req.id !== id)
     }
   }
 

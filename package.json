@@ -1,6 +1,6 @@
 {
   "name": "brave-core",
-  "version": "1.66.46",
+  "version": "1.66.70",
   "description": "Brave Core is a set of changes, APIs and scripts used for customizing Chromium to make Brave.",
   "main": "index.js",
   "scripts": {
@@ -66,9 +66,15 @@
     "projects": {
       "chrome": {
         "dir": "src",
-        "tag": "123.0.6312.86",
+        "tag": "124.0.6367.29",
         "repository": {
           "url": "https://github.com/flamy-brave/brave-chromium-custom-sync"
+        }
+      },
+      "depot_tools": {
+        "dir": "vendor/depot_tools",
+        "repository": {
+          "url": "https://chromium.googlesource.com/chromium/tools/depot_tools.git"
         }
       }
     }
@@ -77,6 +83,7 @@
     "@storybook/addon-essentials": "7.5.3",
     "@storybook/addon-knobs": "7.0.2",
     "@storybook/addons": "7.5.3",
+    "@types/dom-navigation": "1.0.3",
     "@storybook/react": "7.5.3",
     "@storybook/react-webpack5": "7.5.3",
     "@testing-library/react-hooks": "7.0.2",

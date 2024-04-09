@@ -554,6 +554,7 @@ export const PortfolioOverview = () => {
                 ? '0'
                 : ''
             }
+            isGrouped={selectedGroupAssetsByItem !== NoneGroupByOption.id}
           />
         )}
       />
@@ -576,7 +577,6 @@ export const PortfolioOverview = () => {
       <BalanceAndLineChartWrapper
         fullWidth={true}
         justifyContent='flex-start'
-        margin={hidePortfolioNFTsTab ? '0px 0px 15px 0px' : '0px'}
       >
         {isPanel && <BackgroundWatermark />}
         <BalanceAndButtonsWrapper
@@ -647,14 +647,14 @@ export const PortfolioOverview = () => {
         </ColumnReveal>
       </BalanceAndLineChartWrapper>
 
-      {!hidePortfolioNFTsTab && (
-        <ControlsRow>
+      <ControlsRow controlsHidden={hidePortfolioNFTsTab}>
+        {!hidePortfolioNFTsTab && (
           <SegmentedControl
             navOptions={PortfolioNavOptions}
             width={384}
           />
-        </ControlsRow>
-      )}
+        )}
+      </ControlsRow>
 
       <Switch>
         <Route

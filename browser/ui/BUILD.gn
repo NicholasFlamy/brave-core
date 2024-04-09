@@ -352,6 +352,8 @@ source_set("ui") {
       "views/frame/brave_browser_view.h",
       "views/frame/brave_browser_view_layout.cc",
       "views/frame/brave_browser_view_layout.h",
+      "views/frame/brave_contents_layout_manager.cc",
+      "views/frame/brave_contents_layout_manager.h",
       "views/frame/brave_contents_view_util.cc",
       "views/frame/brave_contents_view_util.h",
       "views/frame/brave_non_client_hit_test_helper.cc",
@@ -536,8 +538,6 @@ source_set("ui") {
     "//brave/browser:sparkle_buildflags",
     "//brave/browser/brave_rewards:util",
     "//brave/browser/ethereum_remote_client/buildflags",
-    "//brave/browser/gcm_driver",
-    "//brave/browser/net",
     "//brave/browser/profiles",
     "//brave/browser/shell_integrations/buildflags",
     "//brave/browser/themes",
@@ -741,7 +741,14 @@ source_set("ui") {
     deps += [ "//brave/components/brave_wayback_machine" ]
 
     if (toolkit_views) {
-      deps += [ "//brave/browser/ui/views/infobars:brave_wayback_machine" ]
+      sources += [
+        "views/page_action/wayback_machine_action_icon_view.cc",
+        "views/page_action/wayback_machine_action_icon_view.h",
+        "views/page_action/wayback_machine_state_manager.cc",
+        "views/page_action/wayback_machine_state_manager.h",
+        "views/wayback_machine_bubble_view.cc",
+        "views/wayback_machine_bubble_view.h",
+      ]
     }
   }
 
@@ -786,7 +793,7 @@ source_set("ui") {
   if (toolkit_views) {
     deps += [
       "//brave/browser/ui/sidebar",
-      "//brave/components/sidebar",
+      "//brave/components/sidebar/browser",
       "//chrome/app:generated_resources",
       "//chrome/browser/ui/views",
       "//components/favicon_base",

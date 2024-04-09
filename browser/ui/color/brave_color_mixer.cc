@@ -12,9 +12,12 @@
 #include "brave/browser/ui/color/color_palette.h"
 #include "brave/browser/ui/color/leo/colors.h"
 #include "brave/components/brave_vpn/common/buildflags/buildflags.h"
+#include "brave/components/brave_wayback_machine/buildflags/buildflags.h"
 #include "brave/components/playlist/common/buildflags/buildflags.h"
 #include "brave/components/speedreader/common/buildflags/buildflags.h"
 #include "chrome/browser/ui/color/chrome_color_id.h"
+#include "chrome/browser/ui/color/material_side_panel_color_mixer.h"
+#include "ui/base/ui_base_features.h"
 #include "ui/color/color_id.h"
 #include "ui/color/color_provider.h"
 #include "ui/color/color_recipe.h"
@@ -233,6 +236,10 @@ void AddChromeLightThemeColorMixer(ui::ColorProvider* provider,
   mixer[kColorTabFocusRingActive] = {ui::kColorFocusableBorderFocused};
   mixer[kColorTabFocusRingInactive] = {ui::kColorFocusableBorderFocused};
 
+  // Sidebar tweaks
+  mixer[kColorSidePanelContentBackground] = {SK_ColorWHITE};
+  mixer[ui::kColorListItemUrlFaviconBackground] = {gfx::kGoogleGrey050};
+
   // Upstream uses tab's background color as omnibox chip background color.
   // In our light mode, there is no difference between location bar's bg
   // color and tab's bg color. So, it looks like chip's bg color is transparent.
@@ -286,6 +293,10 @@ void AddChromeDarkThemeColorMixer(ui::ColorProvider* provider,
       ui::kColorFocusableBorderFocused};
   mixer[kColorTabFocusRingActive] = {ui::kColorFocusableBorderFocused};
   mixer[kColorTabFocusRingInactive] = {ui::kColorFocusableBorderFocused};
+
+  // Sidebar tweaks
+  mixer[kColorSidePanelContentBackground] = {gfx::kGoogleGrey900};
+  mixer[ui::kColorListItemUrlFaviconBackground] = {gfx::kGoogleGrey800};
 }
 
 void AddChromeColorMixerForAllThemes(ui::ColorProvider* provider,
@@ -307,6 +318,19 @@ void AddChromeColorMixerForAllThemes(ui::ColorProvider* provider,
       base::BindRepeating(get_toolbar_ink_drop_color, 0.25f, 0.05f)};
   mixer[kColorToolbarInkDropRipple] = {
       base::BindRepeating(get_toolbar_ink_drop_color, 0.4f, 0.1f)};
+
+  if (key.color_mode == ui::ColorProviderKey::ColorMode::kLight) {
+    mixer[ui::kColorMenuBackground] = {kColorToolbar};
+  } else {
+    mixer[ui::kColorMenuBackground] = {ui::kColorFrameActive};
+  }
+  mixer[ui::kColorMenuIcon] = {kColorToolbarButtonIcon};
+  mixer[ui::kColorMenuItemForegroundSecondary] = {kColorToolbarButtonIcon};
+  mixer[ui::kColorMenuSeparator] = {
+      base::BindRepeating([](SkColor input, const ui::ColorMixer& mixer) {
+        return SkColorSetA(mixer.GetResultColor(kColorToolbarButtonIcon),
+                           0.4 * 255);
+      })};
 }
 
 void AddBraveColorMixerForAllThemes(ui::ColorProvider* provider,
@@ -370,6 +394,12 @@ void AddBravifiedChromeThemeColorMixer(ui::ColorProvider* provider,
 
   if (key.custom_theme) {
     return;
+  }
+
+  // This is behind features::IsChromeRefresh2023 upstream, but without it the
+  // colors are not set correctly.
+  if (!features::IsChromeRefresh2023()) {
+    AddMaterialSidePanelColorMixer(provider, key);
   }
 
   key.color_mode == ui::ColorProviderKey::ColorMode::kDark
@@ -459,6 +489,13 @@ void AddBraveLightThemeColorMixer(ui::ColorProvider* provider,
   mixer[kColorWebDiscoveryInfoBarLink] = {SkColorSetRGB(0x4C, 0x54, 0xD2)};
   mixer[kColorWebDiscoveryInfoBarNoThanks] = {SkColorSetRGB(0x6B, 0x70, 0x84)};
   mixer[kColorWebDiscoveryInfoBarClose] = {SkColorSetRGB(0x6B, 0x70, 0x84)};
+
+#if BUILDFLAG(ENABLE_BRAVE_WAYBACK_MACHINE)
+  mixer[kColorWaybackMachineURLLoaded] = {leo::GetColor(
+      leo::Color::kColorSystemfeedbackSuccessIcon, leo::Theme::kLight)};
+  mixer[kColorWaybackMachineURLNotAvailable] = {leo::GetColor(
+      leo::Color::kColorSystemfeedbackErrorIcon, leo::Theme::kLight)};
+#endif
 
   // Color for download button when all completed and button needs user
   // interaction.
@@ -570,6 +607,13 @@ void AddBraveDarkThemeColorMixer(ui::ColorProvider* provider,
       SkColorSetARGB(0xBF, 0xEC, 0xEF, 0xF2)};
   mixer[kColorWebDiscoveryInfoBarClose] = {
       SkColorSetARGB(0xBF, 0x8C, 0x90, 0xA1)};
+
+#if BUILDFLAG(ENABLE_BRAVE_WAYBACK_MACHINE)
+  mixer[kColorWaybackMachineURLLoaded] = {leo::GetColor(
+      leo::Color::kColorSystemfeedbackSuccessIcon, leo::Theme::kDark)};
+  mixer[kColorWaybackMachineURLNotAvailable] = {leo::GetColor(
+      leo::Color::kColorSystemfeedbackErrorIcon, leo::Theme::kDark)};
+#endif
 
   mixer[kColorBraveDownloadToolbarButtonActive] = {
       SkColorSetRGB(0x87, 0x84, 0xF4)};

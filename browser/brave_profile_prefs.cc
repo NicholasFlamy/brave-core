@@ -123,7 +123,7 @@
 #endif
 
 #if defined(TOOLKIT_VIEWS)
-#include "brave/components/sidebar/pref_names.h"
+#include "brave/components/sidebar/browser/pref_names.h"
 #endif
 
 #if BUILDFLAG(ENABLE_EXTENSIONS)
@@ -264,7 +264,6 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
   webtorrent::RegisterProfilePrefs(registry);
 #endif
 
-  // wayback machine
 #if BUILDFLAG(ENABLE_BRAVE_WAYBACK_MACHINE)
   registry->RegisterBooleanPref(kBraveWaybackMachineEnabled, true);
 #endif

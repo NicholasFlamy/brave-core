@@ -58,7 +58,6 @@ import org.chromium.base.MathUtils;
 import org.chromium.base.ThreadUtils;
 import org.chromium.base.task.AsyncTask;
 import org.chromium.chrome.R;
-import org.chromium.chrome.browser.BraveRelaunchUtils;
 import org.chromium.chrome.browser.BraveRewardsHelper;
 import org.chromium.chrome.browser.BraveRewardsNativeWorker;
 import org.chromium.chrome.browser.BraveRewardsObserver;
@@ -508,7 +507,6 @@ public abstract class BraveToolbarLayoutImpl extends ToolbarLayout
                                 && mBraveRewardsNativeWorker.isSupported()) {
                             showOnBoarding();
                         }
-                        findMediaFiles(tab);
                     }
 
                     @Override
@@ -603,7 +601,7 @@ public abstract class BraveToolbarLayoutImpl extends ToolbarLayout
     private void findMediaFiles(Tab tab) {
         if (mPlaylistService != null && isPlaylistEnabledByPrefsAndFlags()) {
             hidePlaylistButton();
-            mPlaylistService.findMediaFilesFromActiveTab((url, playlistItems) -> {});
+            mPlaylistService.findMediaFilesFromActiveTab();
         }
     }
 
@@ -1391,11 +1389,6 @@ public abstract class BraveToolbarLayoutImpl extends ToolbarLayout
     public void onCompleteReset(boolean success) {
         if (success) {
             BraveRewardsHelper.resetRewards();
-            try {
-                BraveRelaunchUtils.askForRelaunch(BraveActivity.getBraveActivity());
-            } catch (BraveActivity.BraveActivityNotFoundException e) {
-                Log.e(TAG, "onCompleteReset " + e);
-            }
         }
     }
 
@@ -1616,7 +1609,6 @@ public abstract class BraveToolbarLayoutImpl extends ToolbarLayout
 
     @Override
     public void onMediaFilesUpdated(Url pageUrl, PlaylistItem[] items) {
-        if (items.length == 0) return;
         Tab currentTab = getToolbarDataProvider().getTab();
         if (currentTab == null || !pageUrl.url.equals(currentTab.getUrl().getSpec())) {
             return;

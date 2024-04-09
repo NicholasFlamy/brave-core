@@ -70,7 +70,7 @@ export default function addBraveRoutes(r: Partial<SettingsRoutes>) {
       r.BASIC.createSection('/leo-assistant', 'leoAssistant')
   }
   if (pageVisibility.content) {
-    r.BRAVE_CONTENT = r.BASIC.createSection('/brave-content', 'content')
+    r.BRAVE_CONTENT = r.BASIC.createSection('/braveContent', 'content')
   }
   if (r.SITE_SETTINGS) {
     r.SITE_SETTINGS_AUTOPLAY = r.SITE_SETTINGS.createChild('autoplay')
@@ -105,7 +105,7 @@ export default function addBraveRoutes(r: Partial<SettingsRoutes>) {
   } else if (!isGuest) {
     console.error('[Brave Settings Overrides] Could not move autofill route to advanced route', r)
   }
-  // Deleted performance menu and system menu includes it instead.
+  // Delete performance menu - system menu includes it instead.
   if (r.PERFORMANCE) {
     delete r.PERFORMANCE
   }
@@ -114,5 +114,9 @@ export default function addBraveRoutes(r: Partial<SettingsRoutes>) {
     r.SAFETY_CHECK.parent = r.ADVANCED
   } else if (!isGuest) {
     console.error('[Brave Settings Overrides] Could not move safety check route to advanced route', r)
+  }
+  // Delete storage access
+  if (r.SITE_SETTINGS_STORAGE_ACCESS) {
+    delete r.SITE_SETTINGS_STORAGE_ACCESS
   }
 }

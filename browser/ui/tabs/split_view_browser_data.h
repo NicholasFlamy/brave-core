@@ -11,16 +11,18 @@
 #include <utility>
 #include <vector>
 
-#include "base/types/pass_key.h"
+#include "base/functional/callback_forward.h"
+#include "base/functional/callback_helpers.h"
+#include "base/memory/weak_ptr.h"
+#include "base/observer_list.h"
 #include "chrome/browser/ui/browser_user_data.h"
 #include "chrome/browser/ui/tabs/tab_model.h"
 
 class SplitViewTabStripModelAdapter;
+class SplitViewBrowserDataObserver;
 
 class SplitViewBrowserData : public BrowserUserData<SplitViewBrowserData> {
  public:
-  using TilePassKey = base::PassKey<SplitViewTabStripModelAdapter>;
-
   using Tile = std::pair<tabs::TabHandle, tabs::TabHandle>;
 
   ~SplitViewBrowserData() override;
@@ -34,7 +36,31 @@ class SplitViewBrowserData : public BrowserUserData<SplitViewBrowserData> {
   bool IsTabTiled(const tabs::TabHandle& tab) const;
 
   std::optional<Tile> GetTile(const tabs::TabHandle& tab) const;
-  const std::vector<Tile> tiles(TilePassKey) const { return tiles_; }
+
+  const std::vector<Tile>& tiles() const { return tiles_; }
+
+  void AddObserver(SplitViewBrowserDataObserver* observer);
+  void RemoveObserver(SplitViewBrowserDataObserver* observer);
+
+  class OnTabDragEndedClosure {
+   public:
+    OnTabDragEndedClosure();
+    OnTabDragEndedClosure(base::WeakPtr<SplitViewBrowserData> data,
+                          base::OnceClosure closure);
+    OnTabDragEndedClosure(OnTabDragEndedClosure&& other) noexcept;
+    OnTabDragEndedClosure& operator=(OnTabDragEndedClosure&& other) noexcept;
+    ~OnTabDragEndedClosure();
+
+    void RunAndReset();
+
+   private:
+    void RunCurrentClosureIfNeededAndReplaceWith(OnTabDragEndedClosure&& other);
+
+    base::WeakPtr<SplitViewBrowserData> data_;
+
+    base::ScopedClosureRunner closure_;
+  };
+  [[nodiscard]] OnTabDragEndedClosure TabDragStarted();
 
  private:
   friend BrowserUserData;
@@ -59,6 +85,12 @@ class SplitViewBrowserData : public BrowserUserData<SplitViewBrowserData> {
   // As UI is likely to read more frequently than insert or delete, we cache
   // index for faster look up.
   base::flat_map<tabs::TabHandle, size_t> tile_index_for_tab_;
+
+  base::ObserverList<SplitViewBrowserDataObserver> observers_;
+
+  bool is_testing_ = false;
+
+  base::WeakPtrFactory<SplitViewBrowserData> weak_ptr_factory_{this};
 
   BROWSER_USER_DATA_KEY_DECL();
 };

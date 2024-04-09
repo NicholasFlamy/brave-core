@@ -22,8 +22,12 @@ class SplitViewTabStripModelAdapter : public TabStripModelObserver {
                                 TabStripModel* model);
   ~SplitViewTabStripModelAdapter() override;
 
-  void MakeTiledTabsAdjacent(SplitViewBrowserData::Tile tile,
+  void MakeTiledTabsAdjacent(const SplitViewBrowserData::Tile& tile,
                              bool move_right_tab = true);
+
+  void TabDragStarted();
+  void TabDragEnded();
+  bool is_in_tab_dragging() const { return is_in_tab_dragging_; }
 
   // TabStripModelObserver:
   void OnTabStripModelChanged(
@@ -50,7 +54,9 @@ class SplitViewTabStripModelAdapter : public TabStripModelObserver {
       tiled_tabs_scheduled_to_be_removed_;
 
   raw_ref<SplitViewBrowserData> split_view_browser_data_;  // owner
-  raw_ptr<TabStripModel> model_;
+  raw_ref<TabStripModel> model_;
+
+  bool is_in_tab_dragging_ = false;
 
   base::WeakPtrFactory<SplitViewTabStripModelAdapter> weak_ptr_factory_{this};
 };

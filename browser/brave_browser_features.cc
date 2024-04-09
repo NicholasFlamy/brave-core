@@ -4,6 +4,7 @@
  * You can obtain one at https://mozilla.org/MPL/2.0/. */
 
 #include "brave/browser/brave_browser_features.h"
+
 #include "build/build_config.h"
 
 namespace features {
@@ -39,6 +40,18 @@ BASE_FEATURE(kBraveWebViewRoundedCorners,
 // retention improvements.
 BASE_FEATURE(kBraveDayZeroExperiment,
              "BraveDayZeroExperiment",
+             base::FEATURE_DISABLED_BY_DEFAULT);
+
+// The variant of the "day zero" experiment. i.e. A, B, C, D, etc.
+const base::FeatureParam<std::string> kBraveDayZeroExperimentVariant{
+    &kBraveDayZeroExperiment,
+    /*name=*/"variant",
+    /*default_value=*/""};
+
+// Shows "Help WDP" in brave://welcome page. If this is off,
+// the page shows up only when country code is Japan
+BASE_FEATURE(kBraveShowHelpWDPInWelcomePage,
+             "brave-show-help-wdp-in-welcome-page",
              base::FEATURE_DISABLED_BY_DEFAULT);
 
 }  // namespace features

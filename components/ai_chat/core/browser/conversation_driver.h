@@ -97,6 +97,7 @@ class ConversationDriver {
   bool GetShouldSendPageContents();
   void ClearConversationHistory();
   mojom::APIError GetCurrentAPIError();
+  mojom::ConversationTurnPtr ClearErrorAndGetFailedMessage();
   void GetPremiumStatus(
       mojom::PageHandler::GetPremiumStatusCallback callback);
   bool GetCanShowPremium();
@@ -108,8 +109,17 @@ class ConversationDriver {
   mojom::SiteInfoPtr BuildSiteInfo();
   bool HasPendingConversationEntry();
 
-  void SubmitSelectedText(const std::string& selected_text,
-                          mojom::ActionType action_type);
+  void AddSubmitSelectedTextError(const std::string& selected_text,
+                                  mojom::ActionType action_type,
+                                  mojom::APIError error);
+
+  void SubmitSelectedText(
+      const std::string& selected_text,
+      mojom::ActionType action_type,
+      EngineConsumer::GenerationDataCallback received_callback =
+          base::NullCallback(),
+      EngineConsumer::GenerationCompletedCallback completed_callback =
+          base::NullCallback());
 
   void RateMessage(bool is_liked,
                    uint32_t turn_id,
@@ -129,6 +139,8 @@ class ConversationDriver {
 
   bool IsArticleTextEmptyForTesting() const { return article_text_.empty(); }
   bool IsSuggestionsEmptyForTesting() const { return suggestions_.empty(); }
+
+  EngineConsumer* GetEngineForTesting() { return engine_.get(); }
 
  protected:
   virtual GURL GetPageURL() const = 0;
@@ -213,6 +225,7 @@ class ConversationDriver {
 
   // TODO(nullhook): Abstract the data model
   std::string model_key_;
+  // TODO(nullhook): Change this to mojo::StructPtr
   std::vector<mojom::ConversationTurn> chat_history_;
   bool is_conversation_active_ = false;
 

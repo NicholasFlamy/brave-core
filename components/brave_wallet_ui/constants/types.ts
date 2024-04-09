@@ -99,8 +99,6 @@ export type PanelTypes =
   | 'send'
   | 'settings'
   | 'signData'
-  | 'signTransaction'
-  | 'signAllTransactions'
   | 'sitePermissions'
   | 'swap'
   | 'transactionDetails'
@@ -207,8 +205,6 @@ export interface PanelState {
   selectedPanel: PanelTypes
   connectingAccounts: string[]
   signMessageData: BraveWallet.SignMessageRequest[]
-  signTransactionRequests: BraveWallet.SignTransactionRequest[]
-  signAllTransactionsRequests: BraveWallet.SignAllTransactionsRequest[]
   hardwareWalletCode?: HardwareWalletResponseCodeType
   selectedTransactionId?: string
   signMessageErrorData: BraveWallet.SignMessageError[]
@@ -932,10 +928,12 @@ export enum TokenStandards {
   ERC1155 = 'ERC1155',
   SPL = 'SPL'
 }
-
-export type ERC721Metadata = {
+export interface CommonNftMetadata {
+  attributes?: any[]
+  description?: string
   image?: string
   image_url?: string
+  name?: string
 }
 
 export enum AddressMessageInfoIds {
