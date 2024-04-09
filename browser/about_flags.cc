@@ -1012,7 +1012,7 @@
           "brave-custom-sync-server",                                          \
           "Specify a custom sync server",                                      \
           "Allows for the utilization of a custom sync server.",               \
-          kOsAndroid,                                                          \
+          kOsAll,                                                          \
           ORIGIN_LIST_VALUE_TYPE(                                              \
               brave_sync::features::kBraveSyncCustomURL,""),                   \
       })                                                                       \
