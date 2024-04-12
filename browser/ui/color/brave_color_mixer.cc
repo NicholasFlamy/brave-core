@@ -236,10 +236,6 @@ void AddChromeLightThemeColorMixer(ui::ColorProvider* provider,
   mixer[kColorTabFocusRingActive] = {ui::kColorFocusableBorderFocused};
   mixer[kColorTabFocusRingInactive] = {ui::kColorFocusableBorderFocused};
 
-  // Sidebar tweaks
-  mixer[kColorSidePanelContentBackground] = {SK_ColorWHITE};
-  mixer[ui::kColorListItemUrlFaviconBackground] = {gfx::kGoogleGrey050};
-
   // Upstream uses tab's background color as omnibox chip background color.
   // In our light mode, there is no difference between location bar's bg
   // color and tab's bg color. So, it looks like chip's bg color is transparent.
@@ -293,10 +289,6 @@ void AddChromeDarkThemeColorMixer(ui::ColorProvider* provider,
       ui::kColorFocusableBorderFocused};
   mixer[kColorTabFocusRingActive] = {ui::kColorFocusableBorderFocused};
   mixer[kColorTabFocusRingInactive] = {ui::kColorFocusableBorderFocused};
-
-  // Sidebar tweaks
-  mixer[kColorSidePanelContentBackground] = {gfx::kGoogleGrey900};
-  mixer[ui::kColorListItemUrlFaviconBackground] = {gfx::kGoogleGrey800};
 }
 
 void AddChromeColorMixerForAllThemes(ui::ColorProvider* provider,
@@ -318,19 +310,6 @@ void AddChromeColorMixerForAllThemes(ui::ColorProvider* provider,
       base::BindRepeating(get_toolbar_ink_drop_color, 0.25f, 0.05f)};
   mixer[kColorToolbarInkDropRipple] = {
       base::BindRepeating(get_toolbar_ink_drop_color, 0.4f, 0.1f)};
-
-  if (key.color_mode == ui::ColorProviderKey::ColorMode::kLight) {
-    mixer[ui::kColorMenuBackground] = {kColorToolbar};
-  } else {
-    mixer[ui::kColorMenuBackground] = {ui::kColorFrameActive};
-  }
-  mixer[ui::kColorMenuIcon] = {kColorToolbarButtonIcon};
-  mixer[ui::kColorMenuItemForegroundSecondary] = {kColorToolbarButtonIcon};
-  mixer[ui::kColorMenuSeparator] = {
-      base::BindRepeating([](SkColor input, const ui::ColorMixer& mixer) {
-        return SkColorSetA(mixer.GetResultColor(kColorToolbarButtonIcon),
-                           0.4 * 255);
-      })};
 }
 
 void AddBraveColorMixerForAllThemes(ui::ColorProvider* provider,
