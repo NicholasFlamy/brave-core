@@ -4,6 +4,7 @@
 # You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import("//brave/components/ai_chat/core/common/buildflags/buildflags.gni")
+import("//printing/buildflags/buildflags.gni")
 
 assert(enable_ai_chat)
 
@@ -38,6 +39,7 @@ source_set("browser_tests") {
       "ai_chat_policy_browsertest.cc",
       "ai_chat_profile_browsertest.cc",
       "ai_chat_render_view_context_menu_browsertest.cc",
+      "ai_chat_ui_browsertest.cc",
       "page_content_fetcher_browsertest.cc",
     ]
     deps = [
@@ -54,6 +56,15 @@ source_set("browser_tests") {
       "//chrome/browser",
       "//chrome/test:test_support",
       "//chrome/test:test_support_ui",
+      "//printing/buildflags",
     ]
+
+    if (enable_print_preview) {
+      sources += [
+        "//chrome/browser/printing/test_print_preview_observer.cc",
+        "//chrome/browser/printing/test_print_preview_observer.h",
+      ]
+      deps += [ "//printing:test_support" ]
+    }
   }
 }

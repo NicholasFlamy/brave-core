@@ -6,10 +6,21 @@ import UIKit
 
 extension UIImpactFeedbackGenerator {
   @discardableResult
-  public func bzzt() -> Self {
+  public func vibrate() -> Self {
     self.prepare()
     self.impactOccurred()
     // Returned in case wanted for retaining to re-impact
     return self
   }
+}
+
+extension UINotificationFeedbackGenerator {
+  @discardableResult
+  public func vibrate(style: FeedbackType) -> Self {
+    self.prepare()
+    self.notificationOccurred(style)
+    // Returned in case wanted for retaining to re-impact
+    return self
+  }
+
 }

@@ -3,6 +3,29 @@
 This document shows all the changes and improvements made in each version of
 [Page Graph](https://github.com/brave/brave-browser/wiki/PageGraph).
 
+## Version 0.6.1
+
+Remove `frame id` from `NodeDOMRoot` instances. The `frame id` property
+on other nodes and edges should reference the `blink id` property
+on `NodeDOMRoot`.
+
+## Version 0.6.0
+
+#### Tracking Frame ID For Many Edges / Actions
+
+Add `frame id` properties for most edges, to resolve ambiguities in the
+graph when scripts modify or call API's in other frames (e.g., local frames)
+
+## Version 0.5.1
+
+#### Fix intermittent issues
+
+Remove `ScriptState::Scope` calls from args serialization. It fails in some edge
+cases, but it doesn't seem to be required at all right now.
+
+Disable v8 cache for external scripts. The cache should be disabled for most
+scripts, but here it was still active.
+
 ## Version 0.5.0
 
 #### Tracking resources redirects

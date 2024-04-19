@@ -34,6 +34,7 @@
 #include "chrome/grit/theme_resources.h"
 #include "third_party/skia/include/core/SkColor.h"
 #include "ui/base/metadata/metadata_impl_macros.h"
+#include "ui/color/color_id.h"
 #include "ui/compositor/paint_recorder.h"
 #include "ui/display/screen.h"
 #include "ui/gfx/canvas.h"
@@ -107,15 +108,14 @@ base::OnceClosure BraveTabContainer::LockLayout() {
 
 void BraveTabContainer::AddedToWidget() {
   TabContainerImpl::AddedToWidget();
+  auto* browser = tab_slot_controller_->GetBrowser();
+  if (!browser) {
+    CHECK_IS_TEST();
+    return;
+  }
 
-  if (base::FeatureList::IsEnabled(tabs::features::kBraveSplitView)) {
-    auto* split_view_data = SplitViewBrowserData::FromBrowser(
-        const_cast<Browser*>(tab_slot_controller_->GetBrowser()));
-    if (!split_view_data) {
-      // Can be null if browser isn't normal type browser.
-      return;
-    }
-
+  if (auto* split_view_data =
+          SplitViewBrowserData::FromBrowser(const_cast<Browser*>(browser))) {
     if (!split_view_data_observation_.IsObserving()) {
       split_view_data_observation_.Observe(split_view_data);
     }
@@ -286,9 +286,9 @@ void BraveTabContainer::UpdateLayoutOrientation() {
   InvalidateLayout();
 }
 
-void BraveTabContainer::PaintBoundingBoxForTiles(gfx::Canvas& canvas) {
-  auto* split_view_data =
-      SplitViewBrowserData::FromBrowser(tab_slot_controller_->GetBrowser());
+void BraveTabContainer::PaintBoundingBoxForTiles(
+    gfx::Canvas& canvas,
+    const SplitViewBrowserData* split_view_data) {
   base::ranges::for_each(split_view_data->tiles(), [&](const auto& tile) {
     PaintBoundingBoxForTile(canvas, tile);
   });
@@ -300,22 +300,31 @@ void BraveTabContainer::PaintBoundingBoxForTile(
   auto* tab_strip_model = tab_slot_controller_->GetBrowser()->tab_strip_model();
   auto tab1_index = tab_strip_model->GetIndexOfTab(tile.first);
   auto tab2_index = tab_strip_model->GetIndexOfTab(tile.second);
-  CHECK(controller_->IsValidModelIndex(tab1_index));
-  CHECK(controller_->IsValidModelIndex(tab2_index));
+  CHECK(controller_->IsValidModelIndex(tab1_index)) << tab1_index;
+  CHECK(controller_->IsValidModelIndex(tab2_index)) << tab2_index;
 
   gfx::Rect bounding_rects;
   for (auto i : {tab1_index, tab2_index}) {
     bounding_rects.Union(GetTabAtModelIndex(i)->bounds());
   }
-  // TODO(sko) This might need fine tune with layout adjustments.
-  bounding_rects.Inset(gfx::Insets::VH(1, 0));
+  const bool is_vertical_tab =
+      tabs::utils::ShouldShowVerticalTabs(tab_slot_controller_->GetBrowser());
+  if (!is_vertical_tab) {
+    // In order to make gap between the bounding box and toolbar.
+    bounding_rects.Inset(gfx::Insets::VH(1, 0));
+  }
 
   constexpr auto kRadius = 12.f;  // same value with --leo-radius-l
 
   cc::PaintFlags flags;
   auto* cp = GetColorProvider();
-  CHECK(cp);
-  flags.setColor(cp->GetColor(kColorBraveSplitViewTileBackground));
+  DCHECK(cp);
+  if (is_vertical_tab && GetNativeTheme()->ShouldUseDarkColors()) {
+    flags.setColor(cp->GetColor(ui::kColorFrameActive));
+  } else {
+    flags.setColor(cp->GetColor(kColorBraveSplitViewTileBackground));
+  }
+
   canvas.DrawRoundRect(bounding_rects, kRadius, flags);
 }
 
@@ -357,12 +366,13 @@ void BraveTabContainer::PaintChildren(const views::PaintInfo& paint_info) {
 
   std::stable_sort(orderable_children.begin(), orderable_children.end());
 
-  if (base::FeatureList::IsEnabled(tabs::features::kBraveSplitView)) {
+  if (auto* split_view_data = SplitViewBrowserData::FromBrowser(
+          tab_slot_controller_->GetBrowser())) {
     ui::PaintRecorder recorder(paint_info.context(),
                                paint_info.paint_recording_size(),
                                paint_info.paint_recording_scale_x(),
                                paint_info.paint_recording_scale_y(), nullptr);
-    PaintBoundingBoxForTiles(*recorder.canvas());
+    PaintBoundingBoxForTiles(*recorder.canvas(), split_view_data);
   }
 
   for (const ZOrderableTabContainerElement& child : orderable_children) {

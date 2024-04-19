@@ -205,6 +205,11 @@ void RegisterProfilePrefsForMigration(
 
   // Added 2023-11
   brave_ads::RegisterProfilePrefsForMigration(registry);
+
+// Added 2024-04
+#if BUILDFLAG(ENABLE_AI_CHAT)
+  ai_chat::prefs::RegisterProfilePrefsForMigration(registry);
+#endif
 }
 
 void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
@@ -458,9 +463,11 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry) {
 
   brave_search_conversion::RegisterPrefs(registry);
 
-  registry->SetDefaultPrefValue(prefs::kEnableMediaRouter, base::Value(false));
-
-  registry->RegisterBooleanPref(kEnableMediaRouterOnRestart, false);
+  // Enabled by default after fixing
+  // https://github.com/brave/brave-browser/issues/18017
+  // kEnableMediaRouterOnRestart is used to remember the user's choice.
+  registry->SetDefaultPrefValue(prefs::kEnableMediaRouter, base::Value(true));
+  registry->RegisterBooleanPref(kEnableMediaRouterOnRestart, true);
 
   // Disable Raw sockets API (see github.com/brave/brave-browser/issues/11546).
   registry->SetDefaultPrefValue(

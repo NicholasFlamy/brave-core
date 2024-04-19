@@ -13,6 +13,7 @@ import Favicon
 import Foundation
 import Growth
 import LocalAuthentication
+import MarketplaceKit
 import Preferences
 import SafariServices
 import Shared
@@ -205,6 +206,12 @@ extension BrowserViewController: WKNavigationDelegate {
         navigationAction: navigationAction
       )
       return (shouldOpen ? .allow : .cancel, preferences)
+    }
+
+    if #available(iOS 17.4, *) {
+      if requestURL.scheme == MarketplaceKitURIScheme {
+        return (.allow, preferences)
+      }
     }
 
     if isStoreURL(requestURL) {
@@ -599,6 +606,11 @@ extension BrowserViewController: WKNavigationDelegate {
     let response = navigationResponse.response
     let responseURL = response.url
     let tab = tab(for: webView)
+
+    // Store the response in the tab
+    if let responseURL = responseURL {
+      tab?.responses[responseURL] = response
+    }
 
     // Check if we upgraded to https and if so we need to update the url of frame evaluations
     if let responseURL = responseURL,

@@ -22,6 +22,7 @@ import("//build/config/features.gni")
 import("//chrome/common/features.gni")
 import("//components/gcm_driver/config.gni")
 import("//mojo/public/tools/bindings/mojom.gni")
+import("//printing/buildflags/buildflags.gni")
 import("//third_party/widevine/cdm/widevine.gni")
 
 source_set("ui") {
@@ -84,6 +85,20 @@ source_set("ui") {
       "webui/ai_chat/ai_chat_ui_page_handler.cc",
       "webui/ai_chat/ai_chat_ui_page_handler.h",
     ]
+
+    if (enable_print_preview) {
+      sources += [
+        "webui/ai_chat/print_preview_extractor.cc",
+        "webui/ai_chat/print_preview_extractor.h",
+      ]
+      deps += [
+        "//chrome/browser/pdf:pdf_pref_names",
+        "//chrome/services/printing/public/mojom",
+        "//components/printing/browser",
+        "//components/printing/common:mojo_interfaces",
+        "//components/services/print_compositor/public/mojom",
+      ]
+    }
 
     if (is_android) {
       sources += [
@@ -410,7 +425,6 @@ source_set("ui") {
       "views/brave_shields/cookie_list_opt_in_bubble_host.h",
       "views/brave_tab_search_bubble_host.cc",
       "views/brave_tab_search_bubble_host.h",
-      "views/bubble/brave_webui_bubble_manager.h",
       "views/commands/default_accelerators_views.cc",
       "views/crash_report_permission_ask_dialog_view.cc",
       "views/crash_report_permission_ask_dialog_view.h",
@@ -765,10 +779,26 @@ source_set("ui") {
   }
 
   if (toolkit_views) {
+    sources += [
+      "views/infobars/brave_confirm_infobar.cc",
+      "views/infobars/brave_confirm_infobar.h",
+      "views/infobars/brave_global_infobar_manager.cc",
+      "views/infobars/brave_global_infobar_manager.h",
+      "views/infobars/brave_infobar_container_view.cc",
+      "views/infobars/brave_infobar_container_view.h",
+      "views/infobars/brave_sync_account_deleted_infobar.cc",
+      "views/infobars/brave_sync_account_deleted_infobar.h",
+      "views/infobars/custom_styled_label.cc",
+      "views/infobars/custom_styled_label.h",
+      "views/infobars/web_discovery_infobar_content_view.cc",
+      "views/infobars/web_discovery_infobar_content_view.h",
+      "views/infobars/web_discovery_infobar_view.cc",
+      "views/infobars/web_discovery_infobar_view.h",
+    ]
+
     deps += [
       "//brave/browser/ui/views/brave_ads",
       "//brave/browser/ui/views/brave_tooltips",
-      "//brave/browser/ui/views/infobars",
       "//ui/views/controls/webview",
     ]
   }
@@ -826,12 +856,6 @@ source_set("ui") {
         "views/wayback_machine_bubble_view.h",
       ]
     }
-  }
-
-  if (toolkit_views) {
-    deps += [
-      "//brave/browser/ui/views/infobars:brave_sync_account_deleted_infobar",
-    ]
   }
 
   if (enable_ipfs) {
@@ -1011,7 +1035,6 @@ source_set("ui") {
       ]
 
       deps += [
-        "//brave/browser/tor",
         "//brave/components/tor",
         "//brave/components/tor:pref_names",
         "//brave/components/tor/resources",
@@ -1194,6 +1217,10 @@ source_set("ui") {
       "views/playlist/playlist_action_dialogs.h",
       "views/playlist/playlist_action_icon_view.cc",
       "views/playlist/playlist_action_icon_view.h",
+      "views/playlist/playlist_add_bubble.cc",
+      "views/playlist/playlist_add_bubble.h",
+      "views/playlist/playlist_confirm_bubble.cc",
+      "views/playlist/playlist_confirm_bubble.h",
       "views/playlist/selectable_list_view.cc",
       "views/playlist/selectable_list_view.h",
       "views/playlist/thumbnail_provider.cc",

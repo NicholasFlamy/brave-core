@@ -9,7 +9,6 @@
 #include <stdint.h>
 
 #include <memory>
-#include <optional>
 #include <string>
 #include <vector>
 
@@ -24,6 +23,11 @@
 #include "mojo/public/cpp/bindings/pending_remote.h"
 #include "mojo/public/cpp/bindings/receiver.h"
 #include "mojo/public/cpp/bindings/remote.h"
+#include "printing/buildflags/buildflags.h"
+
+#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
+#include "brave/browser/ui/webui/ai_chat/print_preview_extractor.h"
+#endif
 
 namespace content {
 class WebContents;
@@ -86,11 +90,26 @@ class AIChatUIPageHandler : public ai_chat::mojom::PageHandler,
                     const std::string& rating_id,
                     bool send_hostname,
                     SendFeedbackCallback callback) override;
+  void ClosePanel() override;
   // content::WebContentsObserver:
   void OnVisibilityChanged(content::Visibility visibility) override;
   void GetPremiumStatus(GetPremiumStatusCallback callback) override;
 
  private:
+  class ChatContextObserver : public content::WebContentsObserver {
+   public:
+    explicit ChatContextObserver(content::WebContents* web_contents,
+                                 AIChatUIPageHandler& page_handler);
+    ~ChatContextObserver() override;
+
+   private:
+    // content::WebContentsObserver
+    void WebContentsDestroyed() override;
+    raw_ref<AIChatUIPageHandler> page_handler_;
+  };
+
+  void HandleWebContentsDestroyed();
+
   // AIChatTabHelper::Observer
   void OnHistoryUpdate() override;
   void OnAPIRequestInProgress(bool in_progress) override;
@@ -101,6 +120,7 @@ class AIChatUIPageHandler : public ai_chat::mojom::PageHandler,
       mojom::SuggestionGenerationStatus suggestion_generation_status) override;
   void OnFaviconImageDataChanged() override;
   void OnPageHasContent(mojom::SiteInfoPtr site_info) override;
+  void OnPrintPreviewRequested() override;
 
   void GetFaviconImageData(GetFaviconImageDataCallback callback) override;
 
@@ -118,7 +138,11 @@ class AIChatUIPageHandler : public ai_chat::mojom::PageHandler,
 
   base::ScopedObservation<AIChatTabHelper, AIChatTabHelper::Observer>
       chat_tab_helper_observation_{this};
+  std::unique_ptr<ChatContextObserver> chat_context_observer_;
 
+#if BUILDFLAG(ENABLE_PRINT_PREVIEW)
+  std::unique_ptr<PrintPreviewExtractor> print_preview_extractor_;
+#endif
   mojo::Receiver<ai_chat::mojom::PageHandler> receiver_;
 
   base::WeakPtrFactory<AIChatUIPageHandler> weak_ptr_factory_{this};

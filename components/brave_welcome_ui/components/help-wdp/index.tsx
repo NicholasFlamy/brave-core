@@ -44,8 +44,9 @@ function HelpWDP () {
       </div>
       <S.BodyBox>
         {getLocale('braveWelcomeHelpWDPDescription')}
+        <span> </span>
         <a
-          href='https://support.brave.com/hc/en-us/articles/4409406835469-What-is-the-Web-Discovery-Project'
+          href='https://support.brave.com/hc/articles/4409406835469-What-is-the-Web-Discovery-Project'
           target='_blank'
         >
           {getLocale('braveWelcomeHelpWDPLearnMore')}
