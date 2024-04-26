@@ -123,6 +123,9 @@ import org.chromium.chrome.browser.fullscreen.BrowserControlsManager;
 import org.chromium.chrome.browser.informers.BraveSyncAccountDeletedInformer;
 import org.chromium.chrome.browser.misc_metrics.MiscAndroidMetricsConnectionErrorHandler;
 import org.chromium.chrome.browser.misc_metrics.MiscAndroidMetricsFactory;
+import org.chromium.chrome.browser.multiwindow.BraveMultiWindowUtils;
+import org.chromium.chrome.browser.multiwindow.MultiInstanceManager;
+import org.chromium.chrome.browser.multiwindow.MultiWindowUtils;
 import org.chromium.chrome.browser.notifications.BraveNotificationWarningDialog;
 import org.chromium.chrome.browser.notifications.permissions.NotificationPermissionController;
 import org.chromium.chrome.browser.notifications.retention.RetentionNotificationUtil;
@@ -165,7 +168,6 @@ import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.chrome.browser.tab.TabLaunchType;
 import org.chromium.chrome.browser.tab.TabSelectionType;
 import org.chromium.chrome.browser.tabmodel.TabModel;
-import org.chromium.chrome.browser.tabmodel.TabModelSelector;
 import org.chromium.chrome.browser.tabmodel.TabModelUtils;
 import org.chromium.chrome.browser.toolbar.bottom.BottomToolbarConfiguration;
 import org.chromium.chrome.browser.toolbar.top.BraveToolbarLayoutImpl;
@@ -806,6 +808,7 @@ public abstract class BraveActivity extends ChromeActivity
         setLoadedFeed(false);
         setComesFromNewTab(false);
         setNewsItemsFeedCards(null);
+        BraveSearchEngineUtils.initializeBraveSearchEngineStates(getTabModelSelector());
         Intent intent = getIntent();
         if (intent != null
                 && intent.getBooleanExtra(BraveWalletActivity.RESTART_WALLET_ACTIVITY, false)) {
@@ -952,9 +955,6 @@ public abstract class BraveActivity extends ChromeActivity
         super.finishNativeInitialization();
 
         boolean isFirstInstall = PackageUtils.isFirstInstall(this);
-
-        BraveSearchEngineUtils.initializeBraveSearchEngineStates(
-                (TabModelSelector) getTabModelSelectorSupplier().get());
 
         BraveVpnNativeWorker.getInstance().reloadPurchasedState();
 
@@ -1187,6 +1187,17 @@ public abstract class BraveActivity extends ChromeActivity
             calender.setTime(new Date());
             calender.add(Calendar.DATE, DAYS_7);
             BraveRewardsHelper.setRewardsOnboardingIconTiming(calender.getTimeInMillis());
+        }
+
+        // Check multiwindow toggle for upgrade case
+        if (!isFirstInstall
+                && !BraveMultiWindowUtils.isCheckUpgradeEnableMultiWindows()
+                && MultiWindowUtils.getInstanceCount() > 1
+                && !BraveMultiWindowUtils.shouldEnableMultiWindows()) {
+            BraveMultiWindowUtils.setCheckUpgradeEnableMultiWindows(true);
+            BraveMultiWindowUtils.updateEnableMultiWindows(true);
+        } else if (!BraveMultiWindowUtils.isCheckUpgradeEnableMultiWindows()) {
+            BraveMultiWindowUtils.setCheckUpgradeEnableMultiWindows(true);
         }
     }
 
@@ -2231,5 +2242,11 @@ public abstract class BraveActivity extends ChromeActivity
 
     public RootUiCoordinator getRootUiCoordinator() {
         return mRootUiCoordinator;
+    }
+
+    public MultiInstanceManager getMultiInstanceManager() {
+        return (MultiInstanceManager)
+                BraveReflectionUtil.getField(
+                        ChromeTabbedActivity.class, "mMultiInstanceManager", this);
     }
 }

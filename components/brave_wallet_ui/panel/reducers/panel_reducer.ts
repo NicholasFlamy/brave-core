@@ -6,7 +6,12 @@
 import { createReducer } from 'redux-act'
 
 // types
-import { BraveWallet, PanelState, PanelTypes } from '../../constants/types'
+import {
+  BraveWallet,
+  PanelState,
+  PanelTypes,
+  TransactionInfoLookup
+} from '../../constants/types'
 import { HardwareWalletResponseCodeType } from '../../common/hardware/types'
 import * as PanelActions from '../actions/wallet_panel_actions'
 import { ShowConnectToSitePayload } from '../constants/action_types'
@@ -34,10 +39,8 @@ const defaultState: PanelState = {
   connectToSiteOrigin: defaultOriginInfo,
   selectedPanel,
   connectingAccounts: [],
-  signMessageData: [],
   hardwareWalletCode: undefined,
-  selectedTransactionId: undefined,
-  signMessageErrorData: []
+  selectedTransactionId: undefined
 }
 
 export const createPanelReducer = (initialState: PanelState) => {
@@ -64,16 +67,6 @@ export const createPanelReducer = (initialState: PanelState) => {
   )
 
   reducer.on(
-    PanelActions.signMessage.type,
-    (state, payload: BraveWallet.SignMessageRequest[]) => {
-      return {
-        ...state,
-        signMessageData: payload
-      }
-    }
-  )
-
-  reducer.on(
     PanelActions.setHardwareWalletInteractionError.type,
     (state: any, payload?: HardwareWalletResponseCodeType) => {
       return {
@@ -85,7 +78,10 @@ export const createPanelReducer = (initialState: PanelState) => {
 
   reducer.on(
     PanelActions.setSelectedTransactionId.type,
-    (state: PanelState, payload: string | undefined): PanelState => {
+    (
+      state: PanelState,
+      payload: TransactionInfoLookup | undefined
+    ): PanelState => {
       return {
         ...state,
         selectedTransactionId: payload
@@ -93,18 +89,6 @@ export const createPanelReducer = (initialState: PanelState) => {
     }
   )
 
-  reducer.on(
-    PanelActions.signMessageError.type,
-    (
-      state: PanelState,
-      payload: BraveWallet.SignMessageError[]
-    ): PanelState => {
-      return {
-        ...state,
-        signMessageErrorData: payload
-      }
-    }
-  )
   return reducer
 }
 

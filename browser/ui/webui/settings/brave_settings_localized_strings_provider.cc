@@ -390,13 +390,11 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
       {"braveWeb3Domains", IDS_BRAVE_WEB3_DOMAINS_SETTINGS_SECTION},
       {"braveTor", IDS_BRAVE_TOR_SETTINGS_SECTION},
       {"braveWallet", IDS_BRAVE_WALLET_SETTINGS_SECTION},
-      {"braveHelpTips", IDS_SETTINGS_HELP_TIPS},
-      {"braveHelpTipsWaybackMachineLabel",
-       IDS_SETTINGS_HELP_TIPS_SHOW_BRAVE_WAYBACK_MACHINE_PROMPT},
-      {"braveHelpTipsWarnBeforeClosingWindow",
+      {"braveWaybackMachineLabel",
+       IDS_SETTINGS_SHOW_BRAVE_WAYBACK_MACHINE_PROMPT},
+      {"braveWarnBeforeClosingWindow",
        IDS_SETTINGS_WINDOW_CLOSING_CONFIRM_OPTION_LABEL},
-      {"braveHelpTipsClosingLastTab",
-       IDS_SETTINGS_CLOSING_LAST_TAB_OPTION_LABEL},
+      {"braveClosingLastTab", IDS_SETTINGS_CLOSING_LAST_TAB_OPTION_LABEL},
       {"braveDisableClickableMuteIndicators",
        IDS_SETTINGS_DISABLE_CLICKABLE_MUTE_INDICATORS},
 
@@ -439,6 +437,9 @@ void BraveAddCommonStrings(content::WebUIDataSource* html_source,
 #if BUILDFLAG(ENABLE_PIN_SHORTCUT)
       {"canPinShortcut", IDS_SETTINGS_CAN_PIN_SHORTCUT},
       {"pinShortcut", IDS_SETTINGS_PIN_SHORTCUT},
+#if BUILDFLAG(IS_WIN)
+      {"pinShortcutSublabel", IDS_SETTINGS_PIN_SHORTCUT_SUBLABEL},
+#endif
       {"shortcutPinned", IDS_SETTINGS_SHORTCUT_PINNED},
 #endif
       // Rewards page

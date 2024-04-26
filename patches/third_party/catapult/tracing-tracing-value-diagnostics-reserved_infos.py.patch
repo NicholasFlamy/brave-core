@@ -1,0 +1,9 @@
+diff --git a/tracing/tracing/value/diagnostics/reserved_infos.py b/tracing/tracing/value/diagnostics/reserved_infos.py
+index 091ee617e2ee970aa021d45356f131c306039095..15b6b6ec356fbf7b36413f462869557c57f59ea8 100644
+--- a/tracing/tracing/value/diagnostics/reserved_infos.py
++++ b/tracing/tracing/value/diagnostics/reserved_infos.py
+@@ -113,3 +113,4 @@ def AllInfos():
+ def AllNames():
+   for info in AllInfos():
+     yield info.name
++from brave_chromium_utils import inline_chromium_src_override; inline_chromium_src_override(globals(), locals())

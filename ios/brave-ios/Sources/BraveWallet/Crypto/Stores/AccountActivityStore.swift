@@ -10,7 +10,7 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
   /// If we want to observe selected account changes (ex. in `WalletPanelView`).
   /// In some cases, we do not want to update the account displayed when the
   /// selected account changes (ex. when removing an account).
-  let observeAccountUpdates: Bool
+  let isWalletPanel: Bool
   @Published private(set) var account: BraveWallet.AccountInfo {
     didSet {
       guard oldValue != account else { return }
@@ -44,6 +44,7 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
   private let blockchainRegistry: BraveWalletBlockchainRegistry
   private let solTxManagerProxy: BraveWalletSolanaTxManagerProxy
   private let ipfsApi: IpfsAPI
+  private let bitcoinWalletService: BraveWalletBitcoinWalletService
   private let assetManager: WalletUserAssetManagerType
   /// Cache for storing `BlockchainToken`s that are not in user assets or our token registry.
   /// This could occur with a dapp creating a transaction.
@@ -65,7 +66,7 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
 
   init(
     account: BraveWallet.AccountInfo,
-    observeAccountUpdates: Bool,
+    isWalletPanel: Bool,
     keyringService: BraveWalletKeyringService,
     walletService: BraveWalletBraveWalletService,
     rpcService: BraveWalletJsonRpcService,
@@ -75,10 +76,11 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
     blockchainRegistry: BraveWalletBlockchainRegistry,
     solTxManagerProxy: BraveWalletSolanaTxManagerProxy,
     ipfsApi: IpfsAPI,
+    bitcoinWalletService: BraveWalletBitcoinWalletService,
     userAssetManager: WalletUserAssetManagerType
   ) {
     self.account = account
-    self.observeAccountUpdates = observeAccountUpdates
+    self.isWalletPanel = isWalletPanel
     self.keyringService = keyringService
     self.walletService = walletService
     self.rpcService = rpcService
@@ -88,6 +90,7 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
     self.blockchainRegistry = blockchainRegistry
     self.solTxManagerProxy = solTxManagerProxy
     self.ipfsApi = ipfsApi
+    self.bitcoinWalletService = bitcoinWalletService
     self.assetManager = userAssetManager
     self._isSwapSupported = .init(
       wrappedValue: account.coin == .eth || account.coin == .sol
@@ -125,12 +128,12 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
         }
       },
       _selectedWalletAccountChanged: { [weak self] account in
-        guard let self, self.observeAccountUpdates else { return }
+        guard let self, self.isWalletPanel else { return }
         self.account = account
         self.update()
       },
       _selectedDappAccountChanged: { [weak self] _, account in
-        guard let self, self.observeAccountUpdates, let account else { return }
+        guard let self, self.isWalletPanel, let account else { return }
         self.account = account
         self.update()
       }
@@ -223,10 +226,27 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
       )
 
       self.isLoadingAccountFiat = true
-      let tokenBalances = await self.rpcService.fetchBalancesForTokens(
-        account: account,
-        networkAssets: allUserNetworkAssets
-      )
+      // TODO: cleanup with balance caching with issue
+      // https://github.com/brave/brave-browser/issues/36764
+      var tokenBalances: [String: Double] = [:]
+      if account.coin == .btc {
+        let networkAsset = allUserNetworkAssets.first {
+          $0.network.supportedKeyrings.contains(account.keyringId.rawValue as NSNumber)
+        }
+        if let btc = networkAsset?.tokens.first,
+          let btcBalance = await self.bitcoinWalletService.fetchBTCBalance(
+            accountId: account.accountId,
+            type: .total
+          )
+        {
+          tokenBalances = [btc.id: btcBalance]
+        }
+      } else {
+        tokenBalances = await self.rpcService.fetchBalancesForTokens(
+          account: account,
+          networkAssets: allUserNetworkAssets
+        )
+      }
       tokenBalanceCache.merge(with: tokenBalances)
 
       // fetch price for every user asset
@@ -363,7 +383,7 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
               groupType: .none,
               token: token,
               network: networkAssets.network,
-              balanceForAccounts: [account.address: Int(tokenBalances[token.id] ?? 0)],
+              balanceForAccounts: [account.id: Int(tokenBalances[token.id] ?? 0)],
               nftMetadata: nftMetadata[token.id]
             )
           )
@@ -375,7 +395,7 @@ class AccountActivityStore: ObservableObject, WalletObserverStore {
               network: networkAssets.network,
               price: tokenPrices[token.assetRatioId.lowercased()] ?? "",
               history: [],
-              balanceForAccounts: [account.address: tokenBalances[token.id] ?? 0]
+              balanceForAccounts: [account.id: tokenBalances[token.id] ?? 0]
             )
           )
         }

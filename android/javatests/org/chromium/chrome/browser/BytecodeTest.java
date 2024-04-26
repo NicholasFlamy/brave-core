@@ -50,6 +50,8 @@ import org.chromium.chrome.browser.browser_controls.BrowserControlsStateProvider
 import org.chromium.chrome.browser.browser_controls.BrowserStateBrowserControlsVisibilityDelegate;
 import org.chromium.chrome.browser.browserservices.intents.BrowserServicesIntentDataProvider;
 import org.chromium.chrome.browser.compositor.CompositorViewHolder;
+import org.chromium.chrome.browser.compositor.layouts.LayoutRenderHost;
+import org.chromium.chrome.browser.compositor.layouts.LayoutUpdateHost;
 import org.chromium.chrome.browser.compositor.layouts.content.TabContentManager;
 import org.chromium.chrome.browser.contextmenu.ContextMenuItemDelegate;
 import org.chromium.chrome.browser.contextmenu.ContextMenuNativeDelegate;
@@ -64,6 +66,7 @@ import org.chromium.chrome.browser.findinpage.FindToolbarManager;
 import org.chromium.chrome.browser.fullscreen.BrowserControlsManager;
 import org.chromium.chrome.browser.fullscreen.FullscreenManager;
 import org.chromium.chrome.browser.identity_disc.IdentityDiscController;
+import org.chromium.chrome.browser.layouts.LayoutManager;
 import org.chromium.chrome.browser.lifecycle.ActivityLifecycleDispatcher;
 import org.chromium.chrome.browser.logo.CachedTintedBitmap;
 import org.chromium.chrome.browser.logo.LogoCoordinator;
@@ -386,6 +389,14 @@ public class BytecodeTest {
                 classExists("org/chromium/components/language/LocaleManagerDelegateImpl"));
         Assert.assertTrue(
                 classExists("org/chromium/components/language/BraveLocaleManagerDelegateImpl"));
+        Assert.assertTrue(
+                classExists("org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31"));
+        Assert.assertTrue(
+                classExists(
+                        "org/chromium/chrome/browser/multiwindow/BraveMultiInstanceManagerApi31"));
+        Assert.assertTrue(classExists("org/chromium/chrome/browser/multiwindow/MultiWindowUtils"));
+        Assert.assertTrue(
+                classExists("org/chromium/chrome/browser/multiwindow/BraveMultiWindowUtils"));
     }
 
     @Test
@@ -609,6 +620,42 @@ public class BytecodeTest {
                         "getSharingAccountInfo",
                         true,
                         AccountInfo.class));
+        Assert.assertTrue(
+                methodExists(
+                        "org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31",
+                        "handleMenuOrKeyboardAction",
+                        false,
+                        null));
+        Assert.assertTrue(
+                methodExists(
+                        "org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31",
+                        "moveTabAction",
+                        false,
+                        null));
+        Assert.assertTrue(
+                methodExists(
+                        "org/chromium/chrome/browser/multiwindow/MultiWindowUtils",
+                        "isOpenInOtherWindowSupported",
+                        false,
+                        null));
+        Assert.assertTrue(
+                methodExists(
+                        "org/chromium/chrome/browser/multiwindow/MultiWindowUtils",
+                        "isMoveToOtherWindowSupported",
+                        false,
+                        null));
+        Assert.assertTrue(
+                methodExists(
+                        "org/chromium/chrome/browser/multiwindow/MultiWindowUtils",
+                        "canEnterMultiWindowMode",
+                        false,
+                        null));
+        Assert.assertTrue(
+                methodExists(
+                        "org/chromium/chrome/browser/multiwindow/MultiWindowUtils",
+                        "shouldShowManageWindowsMenu",
+                        false,
+                        null));
     }
 
     @Test
@@ -994,6 +1041,20 @@ public class BytecodeTest {
                         OmniboxActionDelegate.class));
         Assert.assertTrue(
                 constructorsMatch(
+                        "org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31",
+                        "org/chromium/chrome/browser/multiwindow/BraveMultiInstanceManagerApi31",
+                        Activity.class,
+                        ObservableSupplier.class,
+                        MultiWindowModeStateDispatcher.class,
+                        ActivityLifecycleDispatcher.class,
+                        ObservableSupplier.class,
+                        MenuOrKeyboardActionController.class));
+        Assert.assertTrue(
+                constructorsMatch(
+                        "org/chromium/chrome/browser/multiwindow/MultiWindowUtils",
+                        "org/chromium/chrome/browser/multiwindow/BraveMultiWindowUtils"));
+        Assert.assertTrue(
+                constructorsMatch(
                         "org/chromium/chrome/browser/feed/FeedSurfaceMediator",
                         "org/chromium/chrome/browser/feed/BraveFeedSurfaceMediator",
                         FeedSurfaceCoordinator.class,
@@ -1315,6 +1376,16 @@ public class BytecodeTest {
                 constructorsMatch(
                         "org/chromium/components/language/LocaleManagerDelegateImpl",
                         "org/chromium/components/language/BraveLocaleManagerDelegateImpl"));
+        Assert.assertTrue(
+                constructorsMatch(
+                        "org/chromium/chrome/browser/compositor/layouts/ToolbarSwipeLayout",
+                        "org/chromium/chrome/browser/compositor/layouts/BraveToolbarSwipeLayout",
+                        Context.class,
+                        LayoutUpdateHost.class,
+                        LayoutRenderHost.class,
+                        BrowserControlsStateProvider.class,
+                        LayoutManager.class,
+                        TopUiThemeColorProvider.class));
     }
 
     @Test
@@ -1584,38 +1655,65 @@ public class BytecodeTest {
                         "org/chromium/chrome/browser/omnibox/suggestions/AutocompleteMediator",
                         "mDataProvider"));
         Assert.assertTrue(
-                fieldExists("org/chromium/chrome/browser/omnibox/suggestions/AutocompleteMediator",
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/suggestions/AutocompleteMediator",
                         "mContext"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/ntp/NewTabPageLayout", "mMvTilesContainerLayout"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/ntp/NewTabPageLayout", "mLogoCoordinator"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/multiwindow/MultiInstanceManagerApi31",
+                        "mInstanceId"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/ntp/NewTabPageLayout",
+                        "mMvTilesContainerLayout"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/ntp/NewTabPageLayout", "mLogoCoordinator"));
         Assert.assertTrue(
                 fieldExists("org/chromium/chrome/browser/dom_distiller/ReaderModeManager", "mTab"));
-        Assert.assertTrue(fieldExists("org/chromium/chrome/browser/omnibox/LocationBarCoordinator",
-                "mLocationBarMediator"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/omnibox/LocationBarCoordinator", "mUrlBar"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/omnibox/LocationBarMediator", "mNativeInitialized"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/omnibox/LocationBarMediator", "mWindowAndroid"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/omnibox/LocationBarMediator", "mLocationBarLayout"));
-        Assert.assertTrue(fieldExists("org/chromium/chrome/browser/omnibox/LocationBarMediator",
-                "mIsUrlFocusChangeInProgress"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/omnibox/LocationBarMediator", "mUrlHasFocus"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/omnibox/LocationBarMediator", "mIsTablet"));
-        Assert.assertTrue(fieldExists("org/chromium/chrome/browser/omnibox/LocationBarMediator",
-                "mIsLocationBarFocusedFromNtpScroll"));
-        Assert.assertTrue(fieldExists("org/chromium/chrome/browser/omnibox/LocationBarMediator",
-                "mShouldClearOmniboxOnFocus"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarCoordinator",
+                        "mLocationBarMediator"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarCoordinator", "mUrlBar"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator",
+                        "mNativeInitialized"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator",
+                        "mWindowAndroid"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator",
+                        "mLocationBarLayout"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator",
+                        "mIsUrlFocusChangeInProgress"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator", "mUrlHasFocus"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator", "mIsTablet"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator",
+                        "mIsLocationBarFocusedFromNtpScroll"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator",
+                        "mShouldClearOmniboxOnFocus"));
         Assert.assertTrue(
                 fieldExists("org/chromium/chrome/browser/omnibox/LocationBarMediator", "mContext"));
-        Assert.assertTrue(fieldExists(
-                "org/chromium/chrome/browser/omnibox/LocationBarMediator", "mBrandedColorScheme"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/omnibox/LocationBarMediator",
+                        "mBrandedColorScheme"));
         Assert.assertTrue(
                 fieldExists("org/chromium/chrome/browser/logo/LogoMediator", "mLogoModel"));
         Assert.assertTrue(
@@ -1653,6 +1751,10 @@ public class BytecodeTest {
                         "org/chromium/chrome/browser/customtabs/features/"
                                 + "partialcustomtab/PartialCustomTabBottomSheetStrategy",
                         "mTab"));
+        Assert.assertTrue(
+                fieldExists(
+                        "org/chromium/chrome/browser/compositor/layouts/ToolbarSwipeLayout",
+                        "mMoveToolbar"));
     }
 
     @Test

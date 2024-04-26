@@ -98,10 +98,8 @@ export type PanelTypes =
   | 'networks'
   | 'send'
   | 'settings'
-  | 'signData'
   | 'sitePermissions'
   | 'swap'
-  | 'transactionDetails'
   | 'activity' // Transactions
   | 'transactionStatus'
 
@@ -177,6 +175,12 @@ export interface TokenRegistry {
   [chainID: string]: BraveWallet.BlockchainToken[]
 }
 
+export interface TransactionInfoLookup {
+  id: string
+  coin: BraveWallet.CoinType
+  chainId: string
+}
+
 export interface UIState {
   selectedPendingTransactionId?: string | undefined
   transactionProviderErrorRegistry: TransactionProviderErrorRegistry
@@ -204,10 +208,8 @@ export interface PanelState {
   connectToSiteOrigin: BraveWallet.OriginInfo
   selectedPanel: PanelTypes
   connectingAccounts: string[]
-  signMessageData: BraveWallet.SignMessageRequest[]
   hardwareWalletCode?: HardwareWalletResponseCodeType
-  selectedTransactionId?: string
-  signMessageErrorData: BraveWallet.SignMessageError[]
+  selectedTransactionId?: TransactionInfoLookup
 }
 
 export interface PageState {

@@ -22,6 +22,7 @@
 #include "content/public/test/test_renderer_host.h"
 #include "content/public/test/web_contents_tester.h"
 #include "testing/gtest/include/gtest/gtest.h"
+#include "ui/base/page_transition_types.h"
 
 class SplitViewTabStripModelAdapterUnitTest
     : public testing::Test,
@@ -33,6 +34,7 @@ class SplitViewTabStripModelAdapterUnitTest
 
   TabStripModel& model() const { return *model_; }
   SplitViewBrowserData& data() const { return *split_view_browser_data_; }
+  SplitViewTabStripModelAdapter& adapter() const { return *adapter_; }
 
   std::unique_ptr<content::WebContents> CreateWebContents() {
     auto contents =
@@ -50,6 +52,7 @@ class SplitViewTabStripModelAdapterUnitTest
 
     split_view_browser_data_.reset(new SplitViewBrowserData(nullptr));
     split_view_browser_data_->is_testing_ = true;
+    split_view_browser_data_->tab_strip_model_for_testing_ = model_.get();
     split_view_browser_data_->tab_strip_model_adapter_ =
         std::make_unique<SplitViewTabStripModelAdapter>(
             *split_view_browser_data_, model_.get());
@@ -100,6 +103,75 @@ TEST_F(SplitViewTabStripModelAdapterUnitTest, TilingTabsMakesTabsAdjacent) {
 
   // Then the tabs should get adjacent.
   EXPECT_EQ(1, model().GetIndexOfTab(secondary_tab));
+}
+
+TEST_F(SplitViewTabStripModelAdapterUnitTest,
+       TilingTabsMakesGroupSynchronized_OnlyFirstTabIsGrouped) {
+  // Given that a tab is in a group,
+  const auto group_id = tab_groups::TabGroupId::GenerateNew();
+  model().group_model()->AddTabGroup(group_id, std::nullopt);
+  model().AddWebContents(CreateWebContents(), -1,
+                         ui::PageTransition::PAGE_TRANSITION_TYPED,
+                         /*add_types=*/0, group_id);
+
+  // When tiling with a non grouped tab
+  model().AppendWebContents(CreateWebContents(), /*foreground*/ true);
+  ASSERT_FALSE(model().GetTabGroupForTab(1));
+  data().TileTabs({model().GetTabHandleAt(0), model().GetTabHandleAt(1)});
+  ASSERT_TRUE(data().IsTabTiled(model().GetTabHandleAt(0)));
+  ASSERT_TRUE(data().IsTabTiled(model().GetTabHandleAt(1)));
+  base::RunLoop().RunUntilIdle();
+
+  // Then the other tab should be grouped too
+  EXPECT_TRUE(model().GetTabGroupForTab(1));
+  EXPECT_EQ(group_id, *model().GetTabGroupForTab(1));
+}
+
+TEST_F(SplitViewTabStripModelAdapterUnitTest,
+       TilingTabsMakesGroupSynchronized_InDifferentGroups) {
+  // Given that tabs are in different groups
+  const auto group_id = tab_groups::TabGroupId::GenerateNew();
+  model().group_model()->AddTabGroup(group_id, std::nullopt);
+  model().AddWebContents(CreateWebContents(), -1,
+                         ui::PageTransition::PAGE_TRANSITION_TYPED,
+                         /*add_types=*/0, group_id);
+
+  const auto second_group_id = tab_groups::TabGroupId::GenerateNew();
+  model().group_model()->AddTabGroup(second_group_id, std::nullopt);
+  model().AddWebContents(CreateWebContents(), -1,
+                         ui::PageTransition::PAGE_TRANSITION_TYPED,
+                         /*add_types=*/0, second_group_id);
+  ASSERT_EQ(second_group_id, *model().GetTabGroupForTab(1));
+
+  // When tiling with a tab in another group,
+  data().TileTabs({model().GetTabHandleAt(0), model().GetTabHandleAt(1)});
+  ASSERT_TRUE(data().IsTabTiled(model().GetTabHandleAt(0)));
+  ASSERT_TRUE(data().IsTabTiled(model().GetTabHandleAt(1)));
+  base::RunLoop().RunUntilIdle();
+
+  // Then the other tab should be moved to the first tab's group
+  EXPECT_EQ(group_id, *model().GetTabGroupForTab(0));
+  EXPECT_EQ(group_id, *model().GetTabGroupForTab(1));
+}
+
+TEST_F(SplitViewTabStripModelAdapterUnitTest,
+       TilingTabsSynchronizePinnedState_OnlyOneTabIsPinned) {
+  // Given that a tab is pinned
+  model().AddWebContents(CreateWebContents(), -1,
+                         ui::PageTransition::PAGE_TRANSITION_TYPED,
+                         /*add_types=*/0);
+  model().SetTabPinned(0, /*pinned*/ true);
+
+  // When tiling with unpinned tab
+  model().AppendWebContents(CreateWebContents(), /*foreground*/ true);
+  ASSERT_FALSE(model().IsTabPinned(1));
+  data().TileTabs({model().GetTabHandleAt(0), model().GetTabHandleAt(1)});
+  ASSERT_TRUE(data().IsTabTiled(model().GetTabHandleAt(0)));
+  ASSERT_TRUE(data().IsTabTiled(model().GetTabHandleAt(1)));
+  base::RunLoop().RunUntilIdle();
+
+  // Then the other tab should be pinned too
+  EXPECT_TRUE(model().IsTabPinned(1));
 }
 
 TEST_F(SplitViewTabStripModelAdapterUnitTest,
@@ -319,4 +391,40 @@ TEST_F(SplitViewTabStripModelAdapterUnitTest, TabGroupedStateChanged) {
   EXPECT_TRUE(model().GetTabGroupForTab(0));
   EXPECT_EQ(0, model().GetIndexOfTab(tab1));
   EXPECT_EQ(1, model().GetIndexOfTab(tab2));
+}
+
+TEST_F(SplitViewTabStripModelAdapterUnitTest,
+       OnTabMoved_TileShouldBeBrokenWhenTabMovedBetweenTile) {
+  // Given that two tabs are tiled and there's a non-tiled tab
+  model().AddWebContents(CreateWebContents(), -1,
+                         ui::PageTransition::PAGE_TRANSITION_TYPED,
+                         /*add_types=*/0);
+  model().AddWebContents(CreateWebContents(), -1,
+                         ui::PageTransition::PAGE_TRANSITION_TYPED,
+                         /*add_types=*/0);
+  model().AddWebContents(CreateWebContents(), -1,
+                         ui::PageTransition::PAGE_TRANSITION_TYPED,
+                         /*add_types=*/0);
+  data().TileTabs({model().GetTabHandleAt(0), model().GetTabHandleAt(1)});
+  ASSERT_TRUE(data().IsTabTiled(model().GetTabHandleAt(0)));
+  ASSERT_TRUE(data().IsTabTiled(model().GetTabHandleAt(1)));
+  ASSERT_FALSE(data().IsTabTiled(model().GetTabHandleAt(2)));
+
+  // When moving non-tiled tab between tiled tabs
+  adapter().TabDragStarted();
+  model().MoveWebContentsAt(2, 1, /*select_after_move*/ false);
+
+  // Then the tile should be kept during drag and drop session
+  EXPECT_TRUE(data().IsTabTiled(model().GetTabHandleAt(0)));
+  EXPECT_FALSE(data().IsTabTiled(model().GetTabHandleAt(1)));
+  EXPECT_TRUE(data().IsTabTiled(model().GetTabHandleAt(2)));
+
+  // When drag-and-drop session ends
+  adapter().TabDragEnded();
+
+  // Then the tile should be broken.
+  base::RunLoop().RunUntilIdle();
+  EXPECT_FALSE(data().IsTabTiled(model().GetTabHandleAt(0)));
+  EXPECT_FALSE(data().IsTabTiled(model().GetTabHandleAt(1)));
+  EXPECT_FALSE(data().IsTabTiled(model().GetTabHandleAt(2)));
 }
