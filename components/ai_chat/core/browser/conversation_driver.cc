@@ -13,6 +13,7 @@
 
 #include "base/containers/contains.h"
 #include "base/containers/fixed_flat_set.h"
+#include "base/debug/crash_logging.h"
 #include "base/functional/bind.h"
 #include "base/memory/weak_ptr.h"
 #include "base/no_destructor.h"
@@ -22,6 +23,7 @@
 #include "base/strings/string_util.h"
 #include "base/strings/utf_string_conversions.h"
 #include "brave/components/ai_chat/core/browser/ai_chat_metrics.h"
+#include "brave/components/ai_chat/core/browser/constants.h"
 #include "brave/components/ai_chat/core/browser/engine/engine_consumer.h"
 #include "brave/components/ai_chat/core/browser/engine/engine_consumer_claude.h"
 #include "brave/components/ai_chat/core/browser/engine/engine_consumer_llama.h"
@@ -269,7 +271,10 @@ void ConversationDriver::InitEngine() {
   auto* model = GetModel(model_key_);
   // Make sure we get a valid model, defaulting to static default or first.
   if (!model) {
-    NOTREACHED() << "Model was not part of static model list";
+    // It is unexpected that we get here. Dump a call stack
+    // to help figure out why it happens.
+    SCOPED_CRASH_KEY_STRING1024("BraveAIChatModel", "key", model_key_);
+    base::debug::DumpWithoutCrashing();
     // Use default
     model = GetModel(features::kAIModelsDefaultKey.Get());
     DCHECK(model);
@@ -489,6 +494,20 @@ void ConversationDriver::OnGeneratePageContentComplete(
     return;
   }
 
+  if (base::CollapseWhitespaceASCII(contents_text, true).empty() &&
+      !is_print_preview_fallback_requested_ && !is_video &&
+      // Don't fallback again for failed print preview retrieval.
+      !base::Contains(kPrintPreviewRetrievalHosts, GetPageURL().host_piece())) {
+    DVLOG(1) << "Initiating print preview fallback";
+    is_print_preview_fallback_requested_ = true;
+    PrintPreviewFallback(
+        base::BindOnce(&ConversationDriver::OnGeneratePageContentComplete,
+                       weak_ptr_factory_.GetWeakPtr(), current_navigation_id_,
+                       std::move(callback)));
+    return;
+  }
+  is_print_preview_fallback_requested_ = false;
+
   OnPageContentUpdated(contents_text, is_video, invalidation_token);
 
   std::move(callback).Run(article_text_, is_video_,
@@ -539,9 +558,9 @@ void ConversationDriver::OnNewPage(int64_t navigation_id) {
   CleanUp();
 }
 
-void ConversationDriver::OnPrintPreviewRequested() {
+void ConversationDriver::NotifyPrintPreviewRequested(bool is_pdf) {
   for (auto& obs : observers_) {
-    obs.OnPrintPreviewRequested();
+    obs.OnPrintPreviewRequested(is_pdf);
   }
 }
 
@@ -555,6 +574,7 @@ void ConversationDriver::CleanUp() {
   suggestions_.clear();
   pending_conversation_entry_.reset();
   is_page_text_fetch_in_progress_ = false;
+  is_print_preview_fallback_requested_ = false;
   is_request_in_progress_ = false;
   suggestion_generation_status_ = mojom::SuggestionGenerationStatus::None;
   should_send_page_contents_ = true;

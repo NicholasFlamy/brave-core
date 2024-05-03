@@ -440,6 +440,12 @@ This file contains all "about" strings.  It is set to NOT be translated, in tran
       <message name="IDS_BLOCK_YOUTUBE_DISTRACTING_ELEMENTS_DESCRIPTION" desc="Hides the sign in, menu, comments and video info elements on YouTube.">
         Blocks the sign in, menu, comments, and video info elements on youtube.com.
       </message>
+      <message name="IDS_BLOCK_YOUTUBE_SHORTS" desc="Hide YouTube shorts">
+        Block YouTube Shorts
+      </message>
+      <message name="IDS_BLOCK_YOUTUBE_SHORTS_DESCRIPTION" desc="Hides shorts on YouTube.">
+        Blocks Shorts from the home page, trending page and search results on youtube.com.
+      </message>
       <message name="IDS_BRAVE_SHIELDS_SOCIAL_BLOCKING_TITLE" desc="Title for social media blocking.">
         Social Media Blocking
       </message>
@@ -1533,7 +1539,7 @@ Are you sure you want to do this?
         Block all cookies
       </message>
       <message name="IDS_BLOCK_COOKIES_OPTION_2" desc="Title for shields option.">
-        Block cross-site cookies
+        Block third-party cookies
       </message>
       <message name="IDS_BLOCK_COOKIES_OPTION_3" desc="Title for shields option.">
         Allow all cookies
@@ -2009,9 +2015,6 @@ Are you sure you want to do this?
     <message name="IDS_RETYPE_PASSWORD" desc="Brave wallet password hint text">
       Verify password
     </message>
-    <message name="IDS_PASSWORD_ERROR" desc="Brave Wallet password error text">
-      Passwords must be at least 8 characters.
-    </message>
     <message name="IDS_RETYPE_PASSWORD_ERROR" desc="Brave Wallet password error text">
       Verified password did not match
     </message>
@@ -2141,10 +2144,16 @@ Are you sure you want to do this?
     <message name="IDS_PASSWORD" desc="Brave Wallet onboarding text">
       Password
     </message>
+    <message name="IDS_ENTER_YOUR_PASSWORD" desc="Brave Wallet onboarding password hint">
+      Enter your password
+    </message>
     <message name="IDS_ACCESSIBILITY_BIOMETRIC_UNLOCK" desc="Brave Wallet onboarding biometric image accessibility text">
       Biometric unlock
     </message>
     <message name="IDS_UNLOCK_WALLET_TITLE" desc="Brave Wallet onboarding text">
+      Unlock Wallet
+    </message>
+    <message name="IDS_UNLOCK_WALLET_SUBTITLE" desc="Brave Wallet onboarding subtitle">
       Enter password to unlock wallet
     </message>
     <message name="IDS_PASSWORD_TEXT" desc="Brave Wallet onboarding text">
@@ -3951,7 +3960,37 @@ If you don't accept this request, VPN will not reconnect and your internet conne
       Close windows
     </message>
     <message name="IDS_MERGE_WINDOWS_SNACKBAR" desc="Text for merge windows snackbar">
-      Please merge other tabs to another Brave window. 
+      Please merge other tabs to another Brave window.
+    </message>
+    <message name="IDS_ALWAYS_ON_VPN" desc="Vpn setting title for always on">
+      Always-on VPN
+    </message>
+    <message name="IDS_ALWAYS_ON_VPN_KILL_SWITCH" desc="Vpn setting title for always on">
+      Always-on VPN &amp; Kill switch
+    </message>
+    <message name="IDS_HOW_TO_TURN_ON" desc="Vpn kill swicth tutorial text">
+      How to turn on:
+    </message>
+    <message name="IDS_KILL_SWITCH_TUTORIAL_TEXT_1" desc="Vpn kill swicth tutorial text">
+      1. Open your device's settings from your app drawer or tapping the button below.
+    </message>
+    <message name="IDS_KILL_SWITCH_TUTORIAL_TEXT_2" desc="Vpn kill swicth tutorial text">
+      2. Find Brave VPN and tap on the settings icon to the right.
+    </message>
+    <message name="IDS_KILL_SWITCH_TUTORIAL_TEXT_3" desc="Vpn kill swicth tutorial text">
+      3. Toggle <ph name="ALWAYS_ON_TUTORIAL_START">&lt;always_on_tutorial&gt;</ph>Always-on VPN<ph name="ALWAYS_ON_TUTORIAL_END">&lt;/always_on_tutorial&gt;</ph> to enable it.
+    </message>
+    <message name="IDS_KILL_SWITCH_TUTORIAL_TEXT_4" desc="Vpn kill swicth tutorial text">
+      4. Toggle <ph name="ALWAYS_ON_TUTORIAL_2_START">&lt;always_on_tutorial_2&gt;</ph>Block connections without VPN<ph name="ALWAYS_ON_TUTORIAL_2_END">&lt;/always_on_tutorial_2&gt;</ph> to enable the kill switch.
+    </message>
+    <message name="IDS_KILL_SWITCH_TEXT" desc="Vpn kill swicth tutorial text">
+      Kill switch will disable split tunneling. It also prevents connections from outside the VPN tunnel.
+    </message>
+    <message name="IDS_KILL_SWITCH_ACTION_TEXT" desc="Vpn kill swicth tutorial action text">
+      Open Android settings
+    </message>
+    <message name="IDS_IN_APP_UPDATE_TEXT" desc="Text for in app update snackbar">
+      Update is downloaded.
     </message>
   </messages>
   </release>

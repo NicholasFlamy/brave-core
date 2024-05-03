@@ -1001,7 +1001,11 @@ public class BrowserViewController: UIViewController {
 
     // Adding a small delay before fetching gives more reliability to it,
     // epsecially when you are connected to a VPN.
-    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+    Task.delayed(bySeconds: 1.0) { @MainActor in
+      // Refresh Skus VPN Credentials before loading VPN state
+      await BraveSkusManager(isPrivateMode: self.privateBrowsingManager.isPrivateBrowsing)?
+        .refreshVPNCredentials()
+
       self.vpnProductInfo.load()
       if let customCredential = Preferences.VPN.skusCredential.value,
         let customCredentialDomain = Preferences.VPN.skusCredentialDomain.value,
@@ -1972,7 +1976,7 @@ public class BrowserViewController: UIViewController {
         {
           tabManager.selectedTab?.reportPageNavigation(to: rewards)
           // Not passing redirection chain here, in page navigation should not use them.
-          tabManager.selectedTab?.reportPageLoad(to: rewards, redirectionURLs: [])
+          tabManager.selectedTab?.reportPageLoad(to: rewards, redirectChain: [])
         }
       }
 
