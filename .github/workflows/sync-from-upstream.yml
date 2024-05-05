@@ -13,8 +13,6 @@ on:
 jobs:
   sync_latest_from_upstream:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     name: Sync latest commits from upstream repo
     steps:
     # REQUIRED step
