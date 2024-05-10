@@ -513,8 +513,6 @@ inline constexpr webui::LocalizedString kLocalizedStrings[] = {
     {"braveWalletNetworkTest", IDS_BRAVE_WALLET_NETWORK_TEST},
     {"braveWalletNetworkGoerli", IDS_BRAVE_WALLET_NETWORK_GOERLI},
     {"braveWalletNetworkSepolia", IDS_BRAVE_WALLET_NETWORK_SEPOLIA},
-    {"braveWalletNetworkBinance", IDS_BRAVE_WALLET_NETWORK_BINANCE},
-    {"braveWalletNetworkBinanceAbbr", IDS_BRAVE_WALLET_NETWORK_BINANCE_ABBR},
     {"braveWalletNetworkLocalhost", IDS_BRAVE_WALLET_NETWORK_LOCALHOST},
     {"braveWalletSelectAccount", IDS_BRAVE_WALLET_SELECT_ACCOUNT},
     {"braveWalletSearchAccount", IDS_BRAVE_WALLET_SEARCH_ACCOUNT},
@@ -1510,6 +1508,7 @@ inline constexpr double kLiFiFeePercentage = 0.875;
 
 constexpr int64_t kBlockTrackerDefaultTimeInSeconds = 20;
 constexpr int64_t kLogTrackerDefaultTimeInSeconds = 20;
+constexpr int64_t kSolanaBlockTrackerTimeInSeconds = 5;
 
 inline constexpr char kPolygonMainnetEndpoint[] =
     "https://mainnet-polygon.brave.com/";

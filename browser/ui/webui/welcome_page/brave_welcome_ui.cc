@@ -90,7 +90,7 @@ void OpenJapanWelcomePage(Profile* profile) {
         GURL("https://brave.com/ja/desktop-ntp-tutorial"), content::Referrer(),
         WindowOpenDisposition::NEW_BACKGROUND_TAB,
         ui::PAGE_TRANSITION_AUTO_TOPLEVEL, false);
-    browser->OpenURL(open_params);
+    browser->OpenURL(open_params, /*navigation_handle_callback=*/{});
   }
 }
 
@@ -163,11 +163,6 @@ BraveWelcomeUI::BraveWelcomeUI(content::WebUI* web_ui, const std::string& name)
   source->AddBoolean(
       "hardwareAccelerationEnabledAtStartup",
       content::GpuDataManager::GetInstance()->HardwareAccelerationEnabled());
-
-  source->AddBoolean(
-      /*name*/ "showHelpWDP",
-      /*value*/ is_jpn || base::FeatureList::IsEnabled(
-                              features::kBraveShowHelpWDPInWelcomePage));
 
   profile->GetPrefs()->SetBoolean(prefs::kHasSeenWelcomePage, true);
 

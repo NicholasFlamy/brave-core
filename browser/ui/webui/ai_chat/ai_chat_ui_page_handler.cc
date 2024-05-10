@@ -132,10 +132,21 @@ void AIChatUIPageHandler::SubmitHumanConversationEntry(
   DCHECK(!active_chat_tab_helper_->IsRequestInProgress())
       << "Should not be able to submit more"
       << "than a single human conversation turn at a time.";
-  mojom::ConversationTurn turn = {
+
+  mojom::ConversationTurnPtr turn = mojom::ConversationTurn::New(
       CharacterType::HUMAN, mojom::ActionType::UNSPECIFIED,
-      ConversationTurnVisibility::VISIBLE, input, std::nullopt};
+      ConversationTurnVisibility::VISIBLE, input, std::nullopt, std::nullopt);
   active_chat_tab_helper_->SubmitHumanConversationEntry(std::move(turn));
+}
+
+void AIChatUIPageHandler::SubmitHumanConversationEntryWithAction(
+    const std::string& input,
+    mojom::ActionType action_type) {
+  DCHECK(!active_chat_tab_helper_->IsRequestInProgress())
+      << "Should not be able to submit more"
+      << "than a single human conversation turn at a time.";
+
+  active_chat_tab_helper_->SubmitSelectedText(input, action_type);
 }
 
 void AIChatUIPageHandler::SubmitSummarizationRequest() {
@@ -202,9 +213,10 @@ void AIChatUIPageHandler::OpenBraveLeoSettings() {
   if (auto* browser = chrome::FindBrowserWithTab(contents_to_navigate)) {
     ShowSingletonTab(browser, url);
   } else {
-    contents_to_navigate->OpenURL({url, content::Referrer(),
-                                   WindowOpenDisposition::NEW_FOREGROUND_TAB,
-                                   ui::PAGE_TRANSITION_LINK, false});
+    contents_to_navigate->OpenURL(
+        {url, content::Referrer(), WindowOpenDisposition::NEW_FOREGROUND_TAB,
+         ui::PAGE_TRANSITION_LINK, false},
+        /*navigation_handle_callback=*/{});
   }
 #else
   ai_chat::ShowBraveLeoSettings(contents_to_navigate);
@@ -221,9 +233,10 @@ void AIChatUIPageHandler::OpenURL(const GURL& url) {
   auto* contents_to_navigate = (active_chat_tab_helper_)
                                    ? active_chat_tab_helper_->web_contents()
                                    : web_contents();
-  contents_to_navigate->OpenURL({url, content::Referrer(),
-                                 WindowOpenDisposition::NEW_FOREGROUND_TAB,
-                                 ui::PAGE_TRANSITION_LINK, false});
+  contents_to_navigate->OpenURL(
+      {url, content::Referrer(), WindowOpenDisposition::NEW_FOREGROUND_TAB,
+       ui::PAGE_TRANSITION_LINK, false},
+      /*navigation_handle_callback=*/{});
 #else
   // We handle open link different on Android as we need to close the chat
   // window because it's always full screen
@@ -459,6 +472,15 @@ void AIChatUIPageHandler::ClosePanel() {
 #else
   ai_chat::CloseActivity(web_contents());
 #endif
+}
+
+void AIChatUIPageHandler::GetActionMenuList(
+    GetActionMenuListCallback callback) {
+  std::move(callback).Run(ai_chat::GetActionMenuList());
+}
+
+void AIChatUIPageHandler::OpenModelSupportUrl() {
+  OpenURL(GURL(kLeoModelSupportUrl));
 }
 
 void AIChatUIPageHandler::OnGetPremiumStatus(

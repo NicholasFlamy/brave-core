@@ -1,8 +1,8 @@
 diff --git a/components/permissions/android/permission_prompt/permission_dialog_delegate.cc b/components/permissions/android/permission_prompt/permission_dialog_delegate.cc
-index c97f4070e82c5233d04badc725a415d54305f642..6b0b4f8c85ae5a6a9acdfea912cd4cc8f31c971b 100644
+index 5db5ebe93e3cce8166b349c21df3bd8f248f5802..04103d45ffa3a9dfe4cac05912271f75aa485db5 100644
 --- a/components/permissions/android/permission_prompt/permission_dialog_delegate.cc
 +++ b/components/permissions/android/permission_prompt/permission_dialog_delegate.cc
-@@ -172,6 +172,7 @@ PermissionDialogDelegate* PermissionDialogDelegate::CreateForTesting(
+@@ -178,6 +178,7 @@ PermissionDialogDelegate* PermissionDialogDelegate::CreateForTesting(
  void PermissionDialogDelegate::Accept(JNIEnv* env,
                                        const JavaParamRef<jobject>& obj) {
    CHECK(permission_prompt_);
@@ -10,7 +10,7 @@ index c97f4070e82c5233d04badc725a415d54305f642..6b0b4f8c85ae5a6a9acdfea912cd4cc8
    permission_prompt_->Accept();
  }
  
-@@ -185,6 +186,7 @@ void PermissionDialogDelegate::AcceptThisTime(
+@@ -191,6 +192,7 @@ void PermissionDialogDelegate::AcceptThisTime(
  void PermissionDialogDelegate::Cancel(JNIEnv* env,
                                        const JavaParamRef<jobject>& obj) {
    CHECK(permission_prompt_);

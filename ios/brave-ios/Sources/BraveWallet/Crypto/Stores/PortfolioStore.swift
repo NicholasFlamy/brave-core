@@ -143,7 +143,7 @@ public struct AssetViewModel: Identifiable, Equatable {
     case .none, .network:
       balance = totalBalance
     }
-    return currencyFormatter.string(from: NSNumber(value: (Double(price) ?? 0) * balance)) ?? ""
+    return currencyFormatter.formatAsFiat((Double(price) ?? 0) * balance) ?? ""
   }
 
   /// Sort by the fiat/value of the asset (price x balance), otherwise by balance when price is unavailable.
@@ -309,16 +309,6 @@ public class PortfolioStore: ObservableObject, WalletObserverStore {
   /// we should avoid calling `update()` in `preferencesDidChange()` unless another view changed.
   private var isSavingFilters: Bool = false
 
-  public private(set) lazy var userAssetsStore: UserAssetsStore = .init(
-    blockchainRegistry: self.blockchainRegistry,
-    rpcService: self.rpcService,
-    keyringService: self.keyringService,
-    assetRatioService: self.assetRatioService,
-    walletService: self.walletService,
-    ipfsApi: self.ipfsApi,
-    userAssetManager: self.assetManager
-  )
-
   let currencyFormatter: NumberFormatter = .usdCurrencyFormatter
 
   /// Cancellable for the last running `update()` Task.
@@ -379,7 +369,6 @@ public class PortfolioStore: ObservableObject, WalletObserverStore {
     walletService.defaultBaseCurrency { [self] currencyCode in
       self.currencyCode = currencyCode
     }
-    Preferences.Wallet.showTestNetworks.observe(from: self)
     Preferences.Wallet.sortOrderFilter.observe(from: self)
     Preferences.Wallet.isHidingSmallBalancesFilter.observe(from: self)
     Preferences.Wallet.nonSelectedAccountsFilter.observe(from: self)
@@ -391,8 +380,6 @@ public class PortfolioStore: ObservableObject, WalletObserverStore {
     rpcServiceObserver = nil
     keyringServiceObserver = nil
     walletServiceObserver = nil
-
-    userAssetsStore.tearDown()
   }
 
   func setupObservers() {
@@ -436,8 +423,6 @@ public class PortfolioStore: ObservableObject, WalletObserverStore {
         // assets update will be called via `CryptoStore`
       }
     )
-
-    self.userAssetsStore.setupObservers()
   }
 
   func update() {
@@ -631,7 +616,7 @@ public class PortfolioStore: ObservableObject, WalletObserverStore {
           return nil
         }
         .reduce(0.0, +)
-      balance = currencyFormatter.string(from: NSNumber(value: currentBalance)) ?? "–"
+      balance = currencyFormatter.formatAsFiat(currentBalance) ?? "–"
       // Compute historical balances based on historical prices and current balances
       let assetsWithHistory = allAssets.filter { !$0.history.isEmpty }  // [[AssetTimePrice]]
       let minCount = assetsWithHistory.map(\.history.count).min() ?? 0  // Shortest array count
@@ -645,7 +630,7 @@ public class PortfolioStore: ObservableObject, WalletObserverStore {
         return .init(
           date: assetsWithHistory.map { $0.history[index].date }.max() ?? .init(),
           price: value,
-          formattedPrice: currencyFormatter.string(from: NSNumber(value: value)) ?? "0.00"
+          formattedPrice: currencyFormatter.formatAsFiat(value) ?? "0.00"
         )
       }
 
@@ -660,7 +645,7 @@ public class PortfolioStore: ObservableObject, WalletObserverStore {
           priceDifference: String(
             format: "%@%@",
             isBalanceUp ? "+" : "",  // include plus if balance increased
-            currencyFormatter.string(from: NSNumber(value: priceDifference)) ?? "\(priceDifference)"
+            currencyFormatter.formatAsFiat(priceDifference) ?? "\(priceDifference)"
           ),
           percentageChange: String(
             format: "%@%.2f%%",

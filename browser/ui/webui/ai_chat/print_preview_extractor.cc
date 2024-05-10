@@ -17,6 +17,7 @@
 #include "brave/components/text_recognition/common/buildflags/buildflags.h"
 #include "brave/services/printing/public/mojom/pdf_to_bitmap_converter.mojom.h"
 #include "chrome/browser/pdf/pdf_pref_names.h"
+#include "chrome/browser/printing/print_compositor_util.h"
 #include "chrome/browser/printing/print_preview_data_service.h"
 #include "chrome/browser/printing/print_view_manager_common.h"
 #include "chrome/browser/printing/printing_service.h"
@@ -35,7 +36,7 @@
 
 #if BUILDFLAG(ENABLE_PDF)
 #include "base/feature_list.h"
-#include "chrome/browser/pdf/pdf_frame_util.h"
+#include "components/pdf/browser/pdf_frame_util.h"
 #include "pdf/pdf_features.h"
 #endif  // BUILDFLAG(ENABLE_PDF)
 
@@ -254,8 +255,7 @@ void PrintPreviewExtractor::DidPrepareDocumentForPreview(
   }
 
   client->PrepareToCompositeDocument(
-      document_cookie, render_frame_host,
-      PrintCompositeClient::GetDocumentType(),
+      document_cookie, render_frame_host, printing::GetCompositorDocumentType(),
       mojo::WrapCallbackWithDefaultInvokeIfNotRun(
           base::BindOnce(&PrintPreviewExtractor::OnPrepareForDocumentToPdfDone,
                          weak_ptr_factory_.GetWeakPtr(), request_id),
@@ -352,7 +352,8 @@ void PrintPreviewExtractor::DidGetDefaultPageLayout(
 void PrintPreviewExtractor::DidStartPreview(
     printing::mojom::DidStartPreviewParamsPtr params,
     int32_t request_id) {
-  DVLOG(3) << __func__ << ": id=" << request_id;
+  DVLOG(3) << __func__ << ": id=" << request_id
+           << " , page count: " << params->page_count;
 }
 
 void PrintPreviewExtractor::OnPrepareForDocumentToPdfDone(
@@ -395,6 +396,9 @@ void PrintPreviewExtractor::PreviewCleanup() {
     return;
   }
   PrintPreviewDataService::GetInstance()->RemoveEntry(*print_preview_ui_id_);
+  if (!is_pdf_) {
+    print_render_frame_->OnPrintPreviewDialogClosed();
+  }
   DisconnectPrintPrieviewUI();
 }
 

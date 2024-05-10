@@ -14,7 +14,6 @@ import XCTest
 
   override class func tearDown() {
     super.tearDown()
-    Preferences.Wallet.showTestNetworks.reset()
     Preferences.Wallet.isBitcoinTestnetEnabled.reset()
   }
 
@@ -102,7 +101,6 @@ import XCTest
   let formatter = WeiFormatter(decimalFormatStyle: .decimals(precision: 18))
 
   func updateHelper(bitcoinTestnetEnabled: Bool) async {
-    Preferences.Wallet.showTestNetworks.value = true
     Preferences.Wallet.isBitcoinTestnetEnabled.value = bitcoinTestnetEnabled
     let ethBalanceWei =
       formatter.weiString(
@@ -178,6 +176,9 @@ import XCTest
           .mockBitcoinTestnet,
         ].filter { $0.coin == coin }
       )
+    }
+    rpcService._hiddenNetworks = {
+      $1([])
     }
 
     rpcService._balance = { accountAddress, coin, chainId, completion in
@@ -357,12 +358,12 @@ import XCTest
 
         XCTAssertEqual(accountDetails[safe: 5]?.account, self.btcAccount1)
         XCTAssertEqual(accountDetails[safe: 5]?.tokensWithBalance, self.btcMainnetTokens)
-        XCTAssertEqual(accountDetails[safe: 5]?.totalBalanceFiat, "$0.66")
+        XCTAssertEqual(accountDetails[safe: 5]?.totalBalanceFiat, "$0.657")
 
         if bitcoinTestnetEnabled {
           XCTAssertEqual(accountDetails[safe: 6]?.account, self.btcTestnetAccount)
           XCTAssertEqual(accountDetails[safe: 6]?.tokensWithBalance, self.btcTestnetTokens)
-          XCTAssertEqual(accountDetails[safe: 6]?.totalBalanceFiat, "$6.57")
+          XCTAssertEqual(accountDetails[safe: 6]?.totalBalanceFiat, "$6.573")
         }
       }.store(in: &cancellables)
 

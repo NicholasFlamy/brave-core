@@ -220,6 +220,7 @@ using extensions::ChromeContentBrowserClientExtensionsPart;
 
 #if !BUILDFLAG(IS_ANDROID)
 #include "brave/browser/new_tab/new_tab_shows_navigation_throttle.h"
+#include "brave/browser/ui/geolocation/brave_geolocation_permission_tab_helper.h"
 #include "brave/browser/ui/webui/brave_news_internals/brave_news_internals_ui.h"
 #include "brave/browser/ui/webui/brave_rewards/rewards_panel_ui.h"
 #include "brave/browser/ui/webui/brave_rewards/tip_panel_ui.h"
@@ -241,7 +242,7 @@ using extensions::ChromeContentBrowserClientExtensionsPart;
 #include "brave/components/brave_shields/core/common/cookie_list_opt_in.mojom.h"
 #include "brave/components/commands/common/commands.mojom.h"
 #include "brave/components/commands/common/features.h"
-#include "components/omnibox/browser/omnibox.mojom.h"
+#include "ui/webui/resources/cr_components/searchbox/searchbox.mojom.h"
 #endif
 
 #if BUILDFLAG(ENABLE_PLAYLIST)
@@ -564,6 +565,18 @@ void BraveContentBrowserClient::
       &render_frame_host));
 #endif  // BUILDFLAG(ENABLE_WIDEVINE)
 
+#if !BUILDFLAG(IS_ANDROID)
+  associated_registry.AddInterface<
+      geolocation::mojom::BraveGeolocationPermission>(base::BindRepeating(
+      [](content::RenderFrameHost* render_frame_host,
+         mojo::PendingAssociatedReceiver<
+             geolocation::mojom::BraveGeolocationPermission> receiver) {
+        BraveGeolocationPermissionTabHelper::BindBraveGeolocationPermission(
+            std::move(receiver), render_frame_host);
+      },
+      &render_frame_host));
+#endif  // !BUILDFLAG(IS_ANDROID)
+
   associated_registry.AddInterface<
       brave_shields::mojom::BraveShieldsHost>(base::BindRepeating(
       [](content::RenderFrameHost* render_frame_host,
@@ -645,7 +658,7 @@ void BraveContentBrowserClient::RegisterWebUIInterfaceBrokers(
           .Add<brave_news::mojom::BraveNewsController>();
 
   if (base::FeatureList::IsEnabled(features::kBraveNtpSearchWidget)) {
-    ntp_registration.Add<omnibox::mojom::PageHandler>();
+    ntp_registration.Add<searchbox::mojom::PageHandler>();
   }
 
   if (base::FeatureList::IsEnabled(
@@ -993,6 +1006,7 @@ void BraveContentBrowserClient::WillCreateURLLoaderFactory(
     int render_process_id,
     URLLoaderFactoryType type,
     const url::Origin& request_initiator,
+    const net::IsolationInfo& isolation_info,
     std::optional<int64_t> navigation_id,
     ukm::SourceIdObj ukm_source_id,
     network::URLLoaderFactoryBuilder& factory_builder,
@@ -1010,9 +1024,9 @@ void BraveContentBrowserClient::WillCreateURLLoaderFactory(
 
   ChromeContentBrowserClient::WillCreateURLLoaderFactory(
       browser_context, frame, render_process_id, type, request_initiator,
-      std::move(navigation_id), ukm_source_id, factory_builder, header_client,
-      bypass_redirect_checks, disable_secure_dns, factory_override,
-      navigation_response_task_runner);
+      isolation_info, std::move(navigation_id), ukm_source_id, factory_builder,
+      header_client, bypass_redirect_checks, disable_secure_dns,
+      factory_override, navigation_response_task_runner);
 }
 
 bool BraveContentBrowserClient::WillInterceptWebSocket(

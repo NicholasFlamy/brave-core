@@ -8,6 +8,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 
 #include "brave/components/ai_chat/core/browser/ai_chat_credential_manager.h"
 #include "brave/components/ai_chat/core/browser/engine/engine_consumer.h"
@@ -46,7 +47,6 @@ class EngineConsumerClaudeRemote : public EngineConsumer {
   void GenerateAssistantResponse(
       const bool& is_video,
       const std::string& page_content,
-      std::optional<std::string> selected_text,
       const ConversationHistory& conversation_history,
       const std::string& human_input,
       GenerationDataCallback data_received_callback,
@@ -59,10 +59,18 @@ class EngineConsumerClaudeRemote : public EngineConsumer {
   void SanitizeInput(std::string& input) override;
   void ClearAllQueries() override;
 
+  void SetAPIForTesting(
+      std::unique_ptr<RemoteCompletionClient> api_for_testing) {
+    api_ = std::move(api_for_testing);
+  }
+  RemoteCompletionClient* GetAPIForTesting() { return api_.get(); }
+
  private:
   void OnGenerateQuestionSuggestionsResponse(
       SuggestedQuestionsCallback callback,
       GenerationResult result);
+
+  std::unique_ptr<RemoteCompletionClient> api_ = nullptr;
 
   base::WeakPtrFactory<EngineConsumerClaudeRemote> weak_ptr_factory_{this};
 };

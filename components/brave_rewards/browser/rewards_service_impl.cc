@@ -2128,7 +2128,8 @@ void RewardsServiceImpl::OnExternalWalletLoginStarted(
         url, key, value, /*domain=*/"", url.path(),
         /*creation_time=*/now, expiration_time, /*last_access_time=*/now,
         /*secure=*/true, /*httponly=*/false, net::CookieSameSite::STRICT_MODE,
-        net::COOKIE_PRIORITY_DEFAULT, /*partition_key=*/std::nullopt);
+        net::COOKIE_PRIORITY_DEFAULT, /*partition_key=*/std::nullopt,
+        /*status=*/nullptr);
 
     cookie_manager->SetCanonicalCookie(
         *cookie,
@@ -2244,6 +2245,8 @@ void RewardsServiceImpl::GetAllContributionsForP3A() {
 
   engine_->GetAllContributions(base::BindOnce(
       &RewardsServiceImpl::OnRecordBackendP3AStatsContributions, AsWeakPtr()));
+  GetRecurringTips(base::BindOnce(
+      &RewardsServiceImpl::OnRecordBackendP3AStatsRecurringTips, AsWeakPtr()));
 }
 
 void RewardsServiceImpl::OnRecordBackendP3AStatsContributions(
@@ -2265,6 +2268,11 @@ void RewardsServiceImpl::OnRecordBackendP3AStatsContributions(
 
   GetAutoContributeEnabled(base::BindOnce(
       &RewardsServiceImpl::OnRecordBackendP3AStatsAC, AsWeakPtr()));
+}
+
+void RewardsServiceImpl::OnRecordBackendP3AStatsRecurringTips(
+    std::vector<mojom::PublisherInfoPtr> list) {
+  p3a::RecordRecurringTipConfigured(!list.empty());
 }
 
 void RewardsServiceImpl::OnRecordBackendP3AStatsAC(bool ac_enabled) {

@@ -287,7 +287,7 @@ public abstract class BraveActivity extends ChromeActivity
     private JsonRpcService mJsonRpcService;
     private MiscAndroidMetrics mMiscAndroidMetrics;
     private SwapService mSwapService;
-    private WalletModel mWalletModel;
+    @Nullable private WalletModel mWalletModel;
     private BlockchainRegistry mBlockchainRegistry;
     private TxService mTxService;
     private EthTxManagerProxy mEthTxManagerProxy;
@@ -481,6 +481,11 @@ public abstract class BraveActivity extends ChromeActivity
         cleanUpMiscAndroidMetrics();
     }
 
+    /**
+     * Gets Wallet model for Brave activity. It may be {@code null} if native initialization has not
+     * completed yet.
+     */
+    @Nullable
     public WalletModel getWalletModel() {
         return mWalletModel;
     }
@@ -509,9 +514,10 @@ public abstract class BraveActivity extends ChromeActivity
     }
 
     private void maybeShowPendingTransactions() {
-        assert mWalletModel != null;
-        // trigger to observer to refresh data to process the pending request
-        mWalletModel.getCryptoModel().refreshTransactions();
+        if (mWalletModel != null) {
+            // Trigger to observer to refresh data to process the pending request.
+            mWalletModel.getCryptoModel().refreshTransactions();
+        }
     }
 
     private void maybeShowSignTxRequestLayout() {
@@ -683,13 +689,15 @@ public abstract class BraveActivity extends ChromeActivity
     }
 
     public void showAccountCreation(@CoinType.EnumType int coinType) {
-        assert mWalletModel != null : " mWalletModel is null ";
-        mWalletModel.getDappsModel().addAccountCreationRequest(coinType);
+        if (mWalletModel != null) {
+            mWalletModel.getDappsModel().addAccountCreationRequest(coinType);
+        }
     }
 
     private void updateWalletBadgeVisibility() {
-        assert mWalletModel != null;
-        mWalletModel.getDappsModel().updateWalletBadgeVisibility();
+        if (mWalletModel != null) {
+            mWalletModel.getDappsModel().updateWalletBadgeVisibility();
+        }
     }
 
     private void verifySubscription() {
@@ -955,7 +963,8 @@ public abstract class BraveActivity extends ChromeActivity
 
     @Override
     public void turnSafeBrowsingOff() {
-        SafeBrowsingBridge.setSafeBrowsingState(SafeBrowsingState.NO_SAFE_BROWSING);
+        SafeBrowsingBridge safeBrowsingBridge = new SafeBrowsingBridge(getCurrentProfile());
+        safeBrowsingBridge.setSafeBrowsingState(SafeBrowsingState.NO_SAFE_BROWSING);
     }
 
     @Override
@@ -1023,8 +1032,10 @@ public abstract class BraveActivity extends ChromeActivity
         }
 
         // Make sure this option is disabled
-        if (PreloadPagesSettingsBridge.getState() != PreloadPagesState.NO_PRELOADING) {
-            PreloadPagesSettingsBridge.setState(PreloadPagesState.NO_PRELOADING);
+        if (PreloadPagesSettingsBridge.getState(getCurrentProfile())
+                != PreloadPagesState.NO_PRELOADING) {
+            PreloadPagesSettingsBridge.setState(
+                    getCurrentProfile(), PreloadPagesState.NO_PRELOADING);
         }
 
         if (BraveRewardsHelper.hasRewardsEnvChange()) {
@@ -2296,14 +2307,24 @@ public abstract class BraveActivity extends ChromeActivity
     // as upstream does, to keep the GmsCore process alive.
     private void executeInitSafeBrowsing(long delay) {
         // SafeBrowsingBridge.getSafeBrowsingState() has to be executed on a main thread
-        PostTask.postDelayedTask(TaskTraits.UI_DEFAULT, () -> {
-            if (SafeBrowsingBridge.getSafeBrowsingState() != SafeBrowsingState.NO_SAFE_BROWSING) {
-                // initSafeBrowsing could be executed on a background thread
-                PostTask.postTask(TaskTraits.USER_VISIBLE_MAY_BLOCK,
-                        () -> { BraveSafeBrowsingApiHandler.getInstance().initSafeBrowsing(); });
-            }
-            executeInitSafeBrowsing(BraveSafeBrowsingApiHandler.SAFE_BROWSING_INIT_INTERVAL_MS);
-        }, delay);
+        PostTask.postDelayedTask(
+                TaskTraits.UI_DEFAULT,
+                () -> {
+                    SafeBrowsingBridge safeBrowsingBridge =
+                            new SafeBrowsingBridge(getCurrentProfile());
+                    if (safeBrowsingBridge.getSafeBrowsingState()
+                            != SafeBrowsingState.NO_SAFE_BROWSING) {
+                        // initSafeBrowsing could be executed on a background thread
+                        PostTask.postTask(
+                                TaskTraits.USER_VISIBLE_MAY_BLOCK,
+                                () -> {
+                                    BraveSafeBrowsingApiHandler.getInstance().initSafeBrowsing();
+                                });
+                    }
+                    executeInitSafeBrowsing(
+                            BraveSafeBrowsingApiHandler.SAFE_BROWSING_INIT_INTERVAL_MS);
+                },
+                delay);
     }
 
     public void updateBottomSheetPosition(int orientation) {

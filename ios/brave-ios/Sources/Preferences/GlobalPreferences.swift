@@ -40,10 +40,8 @@ extension Preferences {
 
   public final class Shields {
     public static let allShields = [
-      httpsEverywhere, googleSafeBrowsing, blockScripts, fingerprintingProtection, blockImages,
+      googleSafeBrowsing, blockScripts, fingerprintingProtection, blockImages,
     ]
-    /// Websites will be upgraded to HTTPS if a loaded page attempts to use HTTP
-    public static let httpsEverywhere = Option<Bool>(key: "shields.https-everywhere", default: true)
     /// Enable Google Safe Browsing
     public static let googleSafeBrowsing = Option<Bool>(
       key: "shields.google-safe-browsing",
@@ -201,6 +199,13 @@ extension Preferences {
     /// and therefore we can try to load them right away and have them ready on the first tab load
     @MainActor public static let lastAdBlockResourcesFolderPath =
       Option<String?>(key: "caching.last-ad-block-resources-folder-path", default: nil)
+
+    /// A cached value for the last file path we got for our ad-block resources
+    ///
+    /// This is a useful setting because it takes too long for resources to load during launch
+    /// and therefore we can try to load them right away and have them ready on the first tab load
+    @MainActor public static let lastAdBlockResourcesFilePath =
+      Option<String?>(key: "caching.last-ad-block-resources-file-path", default: nil)
 
     /// A cached value for the last folder path we got our filter lists components
     ///

@@ -95,6 +95,7 @@ source_set("ui") {
         "//chrome/browser/pdf",
         "//chrome/browser/pdf:pdf_pref_names",
         "//chrome/services/printing/public/mojom",
+        "//components/pdf/browser",
         "//components/printing/browser",
         "//components/printing/common:mojo_interfaces",
         "//components/services/print_compositor/public/mojom",
@@ -262,8 +263,6 @@ source_set("ui") {
       "webui/settings/brave_wallet_handler.h",
       "webui/settings/default_brave_shields_handler.cc",
       "webui/settings/default_brave_shields_handler.h",
-      "webui/settings/settings_cookies_view_handler.cc",
-      "webui/settings/settings_cookies_view_handler.h",
       "webui/side_panel/reading_list/brave_reading_list_page_handler.cc",
       "webui/side_panel/reading_list/brave_reading_list_page_handler.h",
       "webui/speedreader/speedreader_toolbar_data_handler_impl.cc",
@@ -307,6 +306,7 @@ source_set("ui") {
       "//third_party/abseil-cpp:absl",
       "//ui/color:color_headers",
       "//ui/color:mixers",
+      "//ui/webui/resources/cr_components/searchbox:mojo_bindings",
       "//url",
     ]
 
@@ -607,6 +607,29 @@ source_set("ui") {
       "views/profiles/brave_profile_menu_view.cc",
       "views/profiles/brave_profile_menu_view.h",
     ]
+  }
+
+  if (is_win || is_mac || is_linux) {
+    sources += [
+      "geolocation/brave_geolocation_permission_tab_helper.cc",
+      "geolocation/brave_geolocation_permission_tab_helper.h",
+      "geolocation/geolocation_utils.h",
+    ]
+
+    deps += [ "//brave/components/brave_geolocation_permission/common:brave_geolocation_permission" ]
+
+    if (is_win) {
+      sources += [ "geolocation/geolocation_utils_win.cc" ]
+    }
+
+    if (is_mac) {
+      sources += [ "geolocation/geolocation_utils_mac.mm" ]
+      frameworks = [ "CoreLocation.framework" ]
+    }
+
+    if (is_linux) {
+      sources += [ "geolocation/geolocation_utils_linux.cc" ]
+    }
   }
 
   # brave's obsolete infobar is only used on Windows and Mac now.
@@ -1143,6 +1166,8 @@ source_set("ui") {
       "webui/brave_wallet/ledger/ledger_ui.h",
       "webui/brave_wallet/page_handler/wallet_page_handler.cc",
       "webui/brave_wallet/page_handler/wallet_page_handler.h",
+      "webui/brave_wallet/panel_handler/wallet_panel_handler.cc",
+      "webui/brave_wallet/panel_handler/wallet_panel_handler.h",
       "webui/brave_wallet/trezor/trezor_ui.cc",
       "webui/brave_wallet/trezor/trezor_ui.h",
       "webui/brave_wallet/wallet_common_ui.cc",
@@ -1157,9 +1182,9 @@ source_set("ui") {
       "//brave/browser/resources/settings/shortcuts_page:generated_resources",
       "//brave/browser/ui/brave_wallet",
       "//brave/browser/ui/webui/brave_wallet/common_handler",
-      "//brave/browser/ui/webui/brave_wallet/panel_handler",
       "//brave/components/brave_news/browser",
       "//brave/components/brave_news/browser/resources:generated_resources",
+      "//brave/components/brave_wallet/browser:permission_utils",
       "//brave/components/brave_wallet/common",
       "//brave/components/brave_wallet/common:mojom",
       "//brave/components/brave_wallet_ui:resources",
@@ -1170,6 +1195,7 @@ source_set("ui") {
       "//brave/components/resources:strings_grit",
       "//components/permissions",
       "//components/pref_registry",
+      "//mojo/public/cpp/bindings",
     ]
   }
   if (is_android) {

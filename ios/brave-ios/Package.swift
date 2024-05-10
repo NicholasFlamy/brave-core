@@ -299,7 +299,6 @@ var package = Package(
         .copy("WelcomeFocus/Resources/Fonts/Poppins-SemiBold.ttf"),
         .copy("WelcomeFocus/Resources/Fonts/Poppins-Medium.ttf"),
         .copy("WelcomeFocus/Resources/Fonts/Poppins-Regular.ttf"),
-        .copy("Welcome/Resources/disconnect-entitylist.json"),
         .copy("ProductNotifications/Resources/blocking-summary.json"),
       ],
       plugins: ["LoggerPlugin"]
@@ -469,6 +468,7 @@ var braveTarget: PackageDescription.Target = .target(
     .copy("Assets/Fonts/NewYorkMedium-Regular.otf"),
     .copy("Assets/Fonts/NewYorkMedium-RegularItalic.otf"),
     .copy("Assets/Interstitial Pages/Pages/BlockedDomain.html"),
+    .copy("Assets/Interstitial Pages/Pages/HTTPBlocked.html"),
     .copy("Assets/Interstitial Pages/Pages/CertificateError.html"),
     .copy("Assets/Interstitial Pages/Pages/GenericError.html"),
     .copy("Assets/Interstitial Pages/Pages/NetworkError.html"),

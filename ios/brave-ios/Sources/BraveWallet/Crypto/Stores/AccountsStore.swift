@@ -84,7 +84,6 @@ class AccountsStore: ObservableObject, WalletObserverStore {
         self?.update()
       }
     )
-    Preferences.Wallet.showTestNetworks.observe(from: self)
   }
 
   func tearDown() {
@@ -223,12 +222,10 @@ class AccountsStore: ObservableObject, WalletObserverStore {
           tokens: tokens
         )
         let totalBalanceFiat =
-          currencyFormatter.string(
-            from: NSNumber(
-              value: totalBalanceFiat(
-                for: account,
-                tokens: tokens
-              )
+          currencyFormatter.formatAsFiat(
+            totalBalanceFiat(
+              for: account,
+              tokens: tokens
             )
           ) ?? ""
         return AccountDetails(
@@ -293,12 +290,5 @@ class AccountsStore: ObservableObject, WalletObserverStore {
     account: BraveWallet.AccountInfo
   ) -> Double? {
     tokenBalancesCache[account.id]?[tokenId]
-  }
-}
-
-extension AccountsStore: PreferencesObserver {
-  public func preferencesDidChange(for key: String) {
-    guard key == Preferences.Wallet.showTestNetworks.key else { return }
-    update()
   }
 }
