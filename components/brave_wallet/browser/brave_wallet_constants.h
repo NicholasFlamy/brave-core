@@ -47,6 +47,12 @@ inline constexpr char kSimpleHashBraveProxyUrl[] =
 
 inline constexpr webui::LocalizedString kLocalizedStrings[] = {
     {"braveWalletNoRoutesFound", IDS_BRAVE_WALLET_NO_ROUTES_FOUND},
+    {"braveWalletPrivateKeyImportType",
+     IDS_BRAVE_WALLET_PRIVATE_KEY_IMPORT_TYPE},
+    {"braveWalletEnterPasswordIfApplicable",
+     IDS_BRAVE_WALLET_ENTER_PASSWORD_IF_APPLICABLE},
+    {"braveWalletAccountNameTooLongError",
+     IDS_BRAVE_WALLET_ACCOUNT_NAME_TOO_LONG_ERROR},
     {"braveWalletFoundIssues", IDS_BRAVE_WALLET_FOUND_ISSUES},
     {"braveWalletContract", IDS_BRAVE_WALLET_CONTRACT},
     {"braveWalletFoundRisks", IDS_BRAVE_WALLET_FOUND_RISKS},
@@ -121,8 +127,8 @@ inline constexpr webui::LocalizedString kLocalizedStrings[] = {
      IDS_BRAVE_WALLET_NETWORK_IS_REQUIRED_ERROR},
     {"braveWalletEnterYourPasswordToStartBackup",
      IDS_BRAVE_WALLET_ENTER_YOUR_PASSWORD_TO_START_BACKUP},
-    {"braveWalletEnterAPassswordToContinue",
-     IDS_BRAVE_WALLET_ENTER_A_PASSSWORD_TO_CONTINUE},
+    {"braveWalletEnterAPasswordToContinue",
+     IDS_BRAVE_WALLET_ENTER_A_PASSWORD_TO_CONTINUE},
     {"braveWalletNoTransactionsYetDescription",
      IDS_BRAVE_WALLET_NO_TRANSACTIONS_YET_DESCRIPTION},
     {"braveWalletNoTransactionsYet", IDS_BRAVE_WALLET_NO_TRANSACTIONS_YET},
@@ -150,7 +156,7 @@ inline constexpr webui::LocalizedString kLocalizedStrings[] = {
     {"braveWalletOrdinalSixteenth", IDS_BRAVE_WALLET_ORDINAL_SIXTEENTH},
     {"braveWalletOrdinalFifteenth", IDS_BRAVE_WALLET_ORDINAL_FIFTEENTH},
     {"braveWalletOrdinalFourteenth", IDS_BRAVE_WALLET_ORDINAL_FOURTEENTH},
-    {"braveWalletOridinalThirteenth", IDS_BRAVE_WALLET_ORIDINAL_THIRTEENTH},
+    {"braveWalletOrdinalThirteenth", IDS_BRAVE_WALLET_ORDINAL_THIRTEENTH},
     {"braveWalletOrdinalTwelfth", IDS_BRAVE_WALLET_ORDINAL_TWELFTH},
     {"braveWalletOrdinalSuffixOther", IDS_BRAVE_WALLET_ORDINAL_SUFFIX_OTHER},
     {"braveWalletOrdinalSuffixFew", IDS_BRAVE_WALLET_ORDINAL_SUFFIX_FEW},
@@ -246,6 +252,11 @@ inline constexpr webui::LocalizedString kLocalizedStrings[] = {
     {"braveWalletSendTo", IDS_BRAVE_WALLET_SEND_TO},
     {"braveWalletInvalidDomainExtension",
      IDS_BRAVE_WALLET_INVALID_DOMAIN_EXTENSION},
+    {"braveWalletChooseAccount", IDS_BRAVE_WALLET_CHOOSE_ACCOUNT},
+    {"braveWalletMarketPrice", IDS_BRAVE_WALLET_MARKET_PRICE},
+    {"braveWalletOwned", IDS_BRAVE_WALLET_OWNED},
+    {"braveWalletNotOwned", IDS_BRAVE_WALLET_NOT_OWNED},
+    {"braveWalletAmount24H", IDS_BRAVE_WALLET_AMOUNT_24H},
     {"braveWalletSlippageToleranceWarning",
      IDS_BRAVE_WALLET_SLIPPAGE_TOLERANCE_WARNING},
     {"braveWalletSlippageToleranceExplanation",
@@ -617,8 +628,8 @@ inline constexpr webui::LocalizedString kLocalizedStrings[] = {
      IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_NO_DATA},
     {"braveWalletConfirmTransactionNext",
      IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_NEXT},
-    {"braveWalletConfirmTransactionFrist",
-     IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_FRIST},
+    {"braveWalletConfirmTransactionFirst",
+     IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_FIRST},
     {"braveWalletConfirmTransactions", IDS_BRAVE_WALLET_CONFIRM_TRANSACTIONS},
     {"braveWalletConfirmTransactionAccountCreationFee",
      IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_ACCOUNT_CREATION_FEE},
@@ -682,6 +693,8 @@ inline constexpr webui::LocalizedString kLocalizedStrings[] = {
     {"braveWalletPermissionForever", IDS_BRAVE_WALLET_PERMISSION_FOREVER},
     {"braveWalletCryptoWalletsDetected",
      IDS_BRAVE_WALLET_CRYPTO_WALLETS_DETECTED},
+    {"braveWalletLegacyWalletDetected",
+     IDS_BRAVE_WALLET_LEGACY_WALLET_DETECTED},
     {"braveWalletCryptoWalletsDescriptionTwo",
      IDS_BRAVE_WALLET_CRYPTO_WALLETS_DESCRIPTION_TWO},
     {"braveWalletImportBraveLegacyDescription",
@@ -1145,8 +1158,7 @@ inline constexpr webui::LocalizedString kLocalizedStrings[] = {
     {"braveWalletImportWithRecoveryPhrase",
      IDS_BRAVE_WALLET_IMPORT_WITH_RECOVERY_PHRASE},
     {"braveWalletMetamaskDetected", IDS_BRAVE_WALLET_METAMASK_DETECTED},
-    {"braveWalletMetamaskImportUsePassword",
-     IDS_BRAVE_WALLET_METAMASK_IMPORT_USE_PASSWORD},
+    {"braveWalletUsePassword", IDS_BRAVE_WALLET_USE_PASSWORD},
     {"braveWalletRecoveryPhraseWord", IDS_BRAVE_WALLET_RECOVERY_PHRASE_WORD},
     {"braveWalletImportPasswordError", IDS_BRAVE_WALLET_IMPORT_PASSWORD_ERROR},
     {"braveWalletMetaMaskExtensionDetected",
@@ -1544,6 +1556,11 @@ inline constexpr char kBitcoinMainnetRpcEndpoint[] =
 inline constexpr char kBitcoinTestnetRpcEndpoint[] =
     "https://blockstream.info/testnet/api/";
 
+inline constexpr char kMeldRpcEndpoint[] =
+    "https://api-meld.wallet.brave.software";
+inline constexpr char kMeldRpcVersionHeader[] = "Meld-Version";
+inline constexpr char kMeldRpcVersion[] = "2023-05-26";
+
 const std::string GetSardineNetworkName(const std::string& chain_id);
 const base::flat_map<std::string, std::string>& GetInfuraChainEndpoints();
 const base::flat_map<std::string, std::string>&
@@ -1553,7 +1570,6 @@ const std::vector<std::string>& GetEthSupportedNftInterfaces();
 // Returns the URL for the Ratios service.
 const std::string GetAssetRatioBaseURL();
 const base::flat_map<std::string, std::string>& GetAnkrBlockchains();
-
 }  // namespace brave_wallet
 
 #endif  // BRAVE_COMPONENTS_BRAVE_WALLET_BROWSER_BRAVE_WALLET_CONSTANTS_H_

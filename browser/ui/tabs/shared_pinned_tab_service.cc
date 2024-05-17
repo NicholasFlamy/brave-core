@@ -7,16 +7,21 @@
 
 #include <utility>
 
+#include "base/functional/bind.h"
+#include "base/functional/callback_forward.h"
 #include "base/notreached.h"
 #include "brave/browser/ui/tabs/features.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/browser.h"
+#include "chrome/browser/ui/browser_finder.h"
 #include "chrome/browser/ui/browser_list.h"
-#include "chrome/browser/ui/browser_tabrestore.h"
 #include "chrome/browser/ui/browser_tabstrip.h"
+#include "chrome/browser/ui/browser_window.h"
 #include "chrome/browser/ui/tabs/tab_enums.h"
 #include "chrome/browser/ui/tabs/tab_model.h"
 #include "content/public/browser/navigation_entry.h"
+#include "content/public/browser/navigation_handle.h"
+#include "content/public/browser/web_contents_observer.h"
 #include "content/public/browser/web_contents_user_data.h"
 
 #define LOCK_REENTRANCE(tab_strip_model)                                  \
@@ -27,34 +32,6 @@
 namespace {
 
 ////////////////////////////////////////////////////////////////////////////////
-// SharedContentsData is a WebContentsUserData attached to pinned tab's web
-// contents that could be movable between multiple windows.
-//
-class SharedContentsData
-    : public content::WebContentsUserData<SharedContentsData> {
- public:
-  SharedContentsData(const SharedContentsData&) = delete;
-  SharedContentsData& operator=(const SharedContentsData&) = delete;
-  ~SharedContentsData() override = default;
-
-  static void RemoveFromWebContents(content::WebContents* contents) {
-    DCHECK(contents);
-    if (FromWebContents(contents)) {
-      contents->SetUserData(UserDataKey(), {});
-    }
-  }
-
- private:
-  explicit SharedContentsData(content::WebContents* contents)
-      : WebContentsUserData(*contents) {}
-
-  friend WebContentsUserData;
-  WEB_CONTENTS_USER_DATA_KEY_DECL();
-};
-
-WEB_CONTENTS_USER_DATA_KEY_IMPL(SharedContentsData);
-
-////////////////////////////////////////////////////////////////////////////////
 // DummyContentsData is a WebContentsUserData attached to a dummy web contents
 // we create for inactive pinned tabs.
 //
@@ -63,7 +40,48 @@ class DummyContentsData
  public:
   DummyContentsData(const DummyContentsData&) = delete;
   DummyContentsData& operator=(const DummyContentsData&) = delete;
-  ~DummyContentsData() override = default;
+  ~DummyContentsData() override;
+
+  static void RemoveFromWebContents(content::WebContents* contents);
+
+  void SynchronizeURL();
+
+  content::WebContents* dummy_contents() { return shared_contents_; }
+  content::WebContents* shared_contents() { return shared_contents_; }
+
+  void stop_propagation() { stop_propagation_ = true; }
+  bool propagation_stopped() const { return stop_propagation_; }
+
+ private:
+  friend WebContentsUserData;
+  WEB_CONTENTS_USER_DATA_KEY_DECL();
+
+  DummyContentsData(content::WebContents* dummy_contents,
+                    content::WebContents* shared_contents);
+
+  raw_ptr<content::WebContents> dummy_contents_ = nullptr;
+  raw_ptr<content::WebContents> shared_contents_ = nullptr;
+
+  bool stop_propagation_ = false;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+// SharedContentsData is a WebContentsUserData attached to pinned tab's web
+// contents that could be movable between multiple windows.
+//
+class SharedContentsData
+    : public content::WebContentsUserData<SharedContentsData>,
+      public content::WebContentsObserver {
+ public:
+  SharedContentsData(const SharedContentsData&) = delete;
+  SharedContentsData& operator=(const SharedContentsData&) = delete;
+  ~SharedContentsData() override {
+    while (!dummy_contentses_.empty()) {
+      auto* dummy_contents = *dummy_contentses_.begin();
+      dummy_contentses_.erase(dummy_contents);
+      DummyContentsData::RemoveFromWebContents(dummy_contents);
+    }
+  }
 
   static void RemoveFromWebContents(content::WebContents* contents) {
     DCHECK(contents);
@@ -72,26 +90,89 @@ class DummyContentsData
     }
   }
 
-  content::WebContents* shared_contents() { return shared_contents_; }
-
-  void stop_propagation() { stop_propagation_ = true; }
-  bool propagation_stopped() const { return stop_propagation_; }
-
- private:
-  DummyContentsData(content::WebContents* dummy_contents,
-                    content::WebContents* shared_contents)
-      : WebContentsUserData(*dummy_contents),
-        shared_contents_(shared_contents) {
-    DCHECK(SharedContentsData::FromWebContents(shared_contents_));
+  void AddDummyContents(content::WebContents* contents) {
+    dummy_contentses_.insert(contents);
   }
 
+  void RemoveDummyContents(content::WebContents* contents) {
+    dummy_contentses_.erase(contents);
+  }
+
+ private:
   friend WebContentsUserData;
   WEB_CONTENTS_USER_DATA_KEY_DECL();
 
-  raw_ptr<content::WebContents> shared_contents_ = nullptr;
+  explicit SharedContentsData(content::WebContents* contents)
+      : WebContentsUserData(*contents) {
+    Observe(contents);
+  }
 
-  bool stop_propagation_ = false;
+  // In order to detect in-document navigation, which causes url to be changed,
+  // use DidFinishNavigation instead of PrimaryPageChanged.
+  void DidFinishNavigation(
+      content::NavigationHandle* navigation_handle) override {
+    if (!navigation_handle->IsInMainFrame() ||
+        !navigation_handle->HasCommitted()) {
+      return;
+    }
+
+    for (auto* dummy_contents : dummy_contentses_) {
+      auto* dummy_contents_data =
+          DummyContentsData::FromWebContents(dummy_contents);
+      DCHECK(dummy_contents_data);
+
+      dummy_contents_data->SynchronizeURL();
+
+      Browser* browser = chrome::FindBrowserWithTab(dummy_contents);
+      DCHECK(browser);
+
+      // Passing nullptr so that omnibox resets the URL based on the active web
+      // contents.
+      browser->window()->UpdateToolbar(nullptr);
+    }
+  }
+
+  base::RepeatingCallback<void(content::WebContents*)> on_primary_page_changed_;
+
+  base::flat_set<content::WebContents*> dummy_contentses_;
 };
+
+WEB_CONTENTS_USER_DATA_KEY_IMPL(SharedContentsData);
+
+DummyContentsData::~DummyContentsData() {
+  // |shared_contents_data| could be null when the tab is unpinned.
+  if (auto* shared_contents_data =
+          SharedContentsData::FromWebContents(shared_contents_)) {
+    shared_contents_data->RemoveDummyContents(dummy_contents_);
+  }
+}
+
+// static
+void DummyContentsData::RemoveFromWebContents(content::WebContents* contents) {
+  DCHECK(contents);
+  if (FromWebContents(contents)) {
+    contents->SetUserData(UserDataKey(), {});
+  }
+}
+
+DummyContentsData::DummyContentsData(content::WebContents* dummy_contents,
+                                     content::WebContents* shared_contents)
+    : WebContentsUserData(*dummy_contents),
+      dummy_contents_(dummy_contents),
+      shared_contents_(shared_contents) {
+  auto* shared_contents_data =
+      SharedContentsData::FromWebContents(shared_contents_);
+  DCHECK(shared_contents_data);
+  shared_contents_data->AddDummyContents(dummy_contents);
+
+  SynchronizeURL();
+}
+
+void DummyContentsData::SynchronizeURL() {
+  const auto visible_url = shared_contents_->GetVisibleURL();
+  dummy_contents_->GetController().GetVisibleEntry()->SetVirtualURL(
+      visible_url);
+}
 
 WEB_CONTENTS_USER_DATA_KEY_IMPL(DummyContentsData);
 
@@ -587,15 +668,6 @@ void SharedPinnedTabService::SynchronizeDeletedPinnedTab(int index) {
     auto* model = browser->tab_strip_model();
     if (model == change_source_model_) {
       continue;
-    }
-
-    auto* contents = model->GetWebContentsAt(index);
-    if (auto* dummy_web_contents =
-            DummyContentsData::FromWebContents(contents)) {
-      dummy_web_contents->stop_propagation();
-    } else {
-      DCHECK(SharedContentsData::FromWebContents(contents));
-      SharedContentsData::RemoveFromWebContents(contents);
     }
 
     // We may not want to keep history for dummy pinned tabs, so pass 0 for

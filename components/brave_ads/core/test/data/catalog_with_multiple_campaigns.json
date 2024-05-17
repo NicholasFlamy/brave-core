@@ -112,11 +112,9 @@
           "conversions": [
             {
               "observationWindow": 30,
-              "urlPattern": "https://www.brave.com/1/*",
-              "type": "postview"
+              "urlPattern": "https://www.brave.com/1/*"
             }
           ],
-          "channels": [],
           "creativeSetId": "340c927f-696e-4060-9933-3eafc56c3f31",
           "perDay": 5,
           "perWeek": 6,
@@ -258,11 +256,9 @@
           "conversions": [
             {
               "observationWindow": 7,
-              "urlPattern": "https://www.brave.com/2/*",
-              "type": "postclick"
+              "urlPattern": "https://www.brave.com/2/*"
             }
           ],
-          "channels": [],
           "creativeSetId": "741cd2ba-3100-45f2-be1e-acedd24e0067",
           "perDay": 10,
           "perWeek": 11,

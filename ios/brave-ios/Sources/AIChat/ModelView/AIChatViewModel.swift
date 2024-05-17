@@ -10,6 +10,14 @@ import Shared
 import SwiftUI
 import WebKit
 
+public enum AIChatModelKey: String {
+  case chatBasic = "chat-basic"
+  case chatExpanded = "chat-leo-expanded"
+  case chatClaudeInstant = "chat-claude-instant"
+  case chatClaudeHaiku = "chat-claude-haiku"
+  case chatClaudeSonnet = "chat-claude-sonnet"
+}
+
 public class AIChatViewModel: NSObject, ObservableObject {
   private var api: AIChat!
   private weak var webView: WKWebView?
@@ -25,6 +33,10 @@ public class AIChatViewModel: NSObject, ObservableObject {
 
   @Published var requestInProgress: Bool = false
   @Published var apiError: AiChat.APIError = .none
+
+  public var slashActions: [AiChat.ActionGroup] {
+    return api.slashActions
+  }
 
   public var isContentAssociationPossible: Bool {
     return webView?.url?.isWebPage(includeDataURIs: true) == true

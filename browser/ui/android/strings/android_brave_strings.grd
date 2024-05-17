@@ -2305,7 +2305,7 @@ Are you sure you want to do this?
       One Year
     </message>
     <message name="IDS_RENEW_MONTHLY_SAVE" desc="Brave VPN plan text">
-      Renew annually save <ph name="PERCENTAGE_AMOUNT">%1$d</ph>%%
+      Renew annually <ph name="DISCOUNT_TEXT_START">&lt;discount_text&gt;</ph>save <ph name="PERCENTAGE_AMOUNT">%1$d</ph>%%<ph name="DISCOUNT_TEXT_END">&lt;/discount_text&gt;</ph>
     </message>
     <message name="IDS_YEARLY_SUBSCRIPTION_AMOUNT" desc="Brave VPN plan text">
       <ph name="YEARLY_AMOUNT">%1$s</ph> / yr.
@@ -2811,7 +2811,7 @@ If you don't accept this request, VPN will not reconnect and your internet conne
       Submit
     </message>
     <message name="IDS_BRAVE_WALLET_SELECT_NETWORK_TITLE" desc="Brave wallet network selection title">
-      Change Connected Account
+      Select Network
     </message>
     <message name="IDS_ACCESSIBILITY_NEW_TAB_PAGE" desc="Accessibility text to read aloud when the user focuses the new tab view.">
       New tab
@@ -3006,7 +3006,7 @@ If you don't accept this request, VPN will not reconnect and your internet conne
       Notification channel for Brave Browser
     </message>
     <message name="IDS_BRAVE_WALLET_ACCOUNT_SELECTOR_ACTIVITY_TITLE" desc="Account Selector activity toolbar title">
-      Select Account
+      Change Connected Account
     </message>
     <message name="IDS_COULDNT_GET_MATCHING_TIMEZONE" desc="Brave vpn error message">
       Couldn't get matching timezone for : <ph name="VALUE">%1$s</ph>
@@ -3548,9 +3548,6 @@ If you don't accept this request, VPN will not reconnect and your internet conne
     <message name="IDS_BRAVE_WALLET_SELECT_ALL" desc="Action title for select all button">
       Select all
     </message>
-    <message name="IDS_BRAVE_WALLET_DESELECT_ALL" desc="Action title for deselect all button">
-      Deselect all
-    </message>
     <message name="IDS_MENU_BRAVE_LEO" desc="Brave AI menu item text">
       Leo
     </message>
@@ -3965,8 +3962,8 @@ If you don't accept this request, VPN will not reconnect and your internet conne
     <message name="IDS_ALWAYS_ON_VPN" desc="Vpn setting title for always on">
       Always-on VPN
     </message>
-    <message name="IDS_ALWAYS_ON_VPN_KILL_SWITCH" desc="Vpn setting title for always on">
-      Always-on VPN &amp; Kill switch
+    <message name="IDS_KILL_SWITCH" desc="Vpn setting title for kill switch">
+      Kill switch
     </message>
     <message name="IDS_HOW_TO_TURN_ON" desc="Vpn kill swicth tutorial text">
       How to turn on:

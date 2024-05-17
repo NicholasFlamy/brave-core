@@ -99,7 +99,7 @@
   <message name="IDS_BRAVE_WALLET_REVIEW_ORDER" desc="Swap tab Review order button">Review order</message>
   <message name="IDS_BRAVE_WALLET_REVIEW_SEND" desc="Send tab Review order button">Review send</message>
   <message name="IDS_BRAVE_WALLET_NO_AVAILIBLE_TOKENS" desc="Send tab placeholder for empty token list.">No available tokens</message>
-  <message name="IDS_BRAVE_WALLET_SEARCH_TOKENS" desc="Send tab search for tokens.">Search token by name</message>
+  <message name="IDS_BRAVE_WALLET_SEARCH_TOKENS" desc="Send tab search for tokens.">Search by name or paste address</message>
   <message name="IDS_BRAVE_WALLET_SEARCH_NFTS" desc="Send tab search for nfts.">Search NFT by name, id</message>
   <message name="IDS_BRAVE_WALLET_CHOOSE_ASSET" desc="Send tab choose asset button.">Choose Asset</message>
   <message name="IDS_BRAVE_WALLET_ORDINALS_WARNING_MESSAGE" desc="Warning message when sending BTC.">Brave Wallet does not currently support Bitcoin NFTs (ordinals). Sending BTC from an address that has ordinals may result in its ordinals being transferred inadvertently.</message>
@@ -109,6 +109,11 @@
   <message name="IDS_BRAVE_WALLET_ADDRESS_OR_DOMAIN_PLACEHOLDER" desc="Seach address or domain input placeholder">Enter public address or domain.</message>
   <message name="IDS_BRAVE_WALLET_SEND_TO" desc="Send screen send to label">Send to</message>
   <message name="IDS_BRAVE_WALLET_INVALID_DOMAIN_EXTENSION" desc="Send screen invalid domain extension error">Invalid domain extension.</message>
+  <message name="IDS_BRAVE_WALLET_CHOOSE_ACCOUNT" desc="Send and Swap screen account selector label">Choose an account to continue</message>
+  <message name="IDS_BRAVE_WALLET_MARKET_PRICE" desc="Token details market price label">Market price</message>
+  <message name="IDS_BRAVE_WALLET_OWNED" desc="Token list owned label">Owned</message>
+  <message name="IDS_BRAVE_WALLET_NOT_OWNED" desc="Token list not owned label">Not owned</message>
+  <message name="IDS_BRAVE_WALLET_AMOUNT_24H" desc="Token list amount and 24h change">Amount/24h</message>
   <message name="IDS_BRAVE_WALLET_BUY_TAB_BUY_NOT_SUPPORTED_MESSAGE" desc="Message shown when the selected network is not supported for buy transactions">Buy not supported for selected network</message>
   <message name="IDS_BRAVE_WALLET_SEARCHING_FOR_DOMAIN" desc="Message shown when searching for a UD or ENS domain">Searching for domain...</message>
   <message name="IDS_BRAVE_WALLET_ENS_OFF_CHAIN_LOOKUP_TITLE" desc="Message title shown when requesting to do an ENS off chain lookup.">Brave supports using off-chain gateways to resolve .eth domains.</message>
@@ -221,7 +226,7 @@
   <message name="IDS_BRAVE_WALLET_ADD_ACCOUNT_IMPORT_HARDWARE" desc="Add account modal import hardware wallet button">Import from hardware wallet</message>
   <message name="IDS_BRAVE_WALLET_ADD_ACCOUNT_HARDWARE" desc="Add account modal hardware button">Hardware</message>
   <message name="IDS_BRAVE_WALLET_ADD_ACCOUNT_CONNECT" desc="Add account modal connect button">Connect</message>
-  <message name="IDS_BRAVE_WALLET_ADD_ACCOUNT_PLACEHOLDER" desc="Add account modal input placholder">Account name</message>
+  <message name="IDS_BRAVE_WALLET_ADD_ACCOUNT_PLACEHOLDER" desc="Add account modal input placholder">Name this account</message>
   <message name="IDS_BRAVE_WALLET_IMPORT_ACCOUNT_DISCLAIMER" desc="Add account modal account disclaimer">These accounts can be used with Web3 DApps, and can be shown in your portfolio. However, note that secondary accounts cannot be restored via recovery phrase from your primary account backup.</message>
   <message name="IDS_BRAVE_WALLET_IMPORT_ACCOUNT_PLACEHOLDER" desc="Add account modal import input placeholder">Paste private key from clipboard</message>
   <message name="IDS_BRAVE_WALLET_IMPORT_ACCOUNT_KEY" desc="Add account modal import private key selector">Private key</message>
@@ -360,7 +365,7 @@
   <message name="IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_AMOUNT_FEE" desc="Confirm transaction panel total fee label">Amount + fee</message>
   <message name="IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_NO_DATA" desc="Confirm transaction panel no data placeholder">No data.</message>
   <message name="IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_NEXT" desc="Confirm transaction panel next transaction button">next</message>
-  <message name="IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_FRIST" desc="Confirm transaction panel first transaction button">first</message>
+  <message name="IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_FIRST" desc="Confirm transaction panel first transaction button">first</message>
   <message name="IDS_BRAVE_WALLET_CONFIRM_TRANSACTIONS" desc="Confirm transaction panel transactions label">transactions</message>
   <message name="IDS_BRAVE_WALLET_CONFIRM_TRANSACTION_ACCOUNT_CREATION_FEE" desc="Confirm transaction panel account creation fee warning">The associated token account does not exist yet. A small amount of SOL will be spent to create and fund it.</message>
   <message name="IDS_BRAVE_WALLET_TRANSACTION_GAS_LIMIT" desc="Transaction gas limit">Gas Limit</message>
@@ -822,7 +827,8 @@
   <message name="IDS_BRAVE_WALLET_RESTORE_WALLET_ERROR" desc="Error message shown when recovery fails">Check your recovery phrase and try again.</message>
   <message name="IDS_BRAVE_WALLET_IMPORT_WITH_RECOVERY_PHRASE" desc="Label for action to go back to import with recovery phrase">Import using your recovery phrase</message>
   <message name="IDS_BRAVE_WALLET_METAMASK_DETECTED" desc="Metamask detected message">Metamask wallet detected!</message>
-  <message name="IDS_BRAVE_WALLET_METAMASK_IMPORT_USE_PASSWORD" desc="Metamask import action message">Use password</message>
+  <message name="IDS_BRAVE_WALLET_LEGACY_WALLET_DETECTED" desc="Legacy wallet detected message">Legacy wallet detected!</message>
+  <message name="IDS_BRAVE_WALLET_USE_PASSWORD" desc="Use password">Use password</message>
   <message name="IDS_BRAVE_WALLET_RECOVERY_PHRASE_WORD" desc="Recovery phrase word label">Word <ph name="VALUE">$1</ph></message>
   <message name="IDS_BRAVE_WALLET_IMPORT_FROM_META_MASK_SEED_INSTRUCTIONS" desc="Instructions for importing a MetaMask wallet via recovery phrase">Type your MetaMask 12-24 word recovery phrase.</message>
   <message name="IDS_BRAVE_WALLET_METAMASK_PASSWORD_INPUT_PLACEHOLDER" desc="Placeholder text for MetaMask password input">Type MetaMask password</message>
@@ -849,7 +855,7 @@
   <message name="IDS_BRAVE_WALLET_MULTI_CHAIN" desc="Description of how the wallet allows access to multiple blockchains">Multi-chain &amp; NFT support</message>
   <message name="IDS_BRAVE_WALLET_CLICK_TO_SWITCH" desc="Action text for switching selection">Click to switch</message>
   <message name="IDS_BRAVE_WALLET_ORDINAL_TWELFTH" desc="Twelfth list item ordinal">Twelfth</message>
-  <message name="IDS_BRAVE_WALLET_ORIDINAL_THIRTEENTH" desc="Thirteenth list item ordinal">Thirteenth</message>
+  <message name="IDS_BRAVE_WALLET_ORDINAL_THIRTEENTH" desc="Thirteenth list item ordinal">Thirteenth</message>
   <message name="IDS_BRAVE_WALLET_ORDINAL_FOURTEENTH" desc="Fourteenth list item ordinal">Fourteenth</message>
   <message name="IDS_BRAVE_WALLET_ORDINAL_FIFTEENTH" desc="Fifteenth item">Fifteenth</message>
   <message name="IDS_BRAVE_WALLET_ORDINAL_SIXTEENTH" desc="Sixteenth">Sixteenth</message>
@@ -897,7 +903,7 @@
   <message name="IDS_BRAVE_WALLET_EDIT_TOKEN" desc="Edit token form title">Edit Token</message>
   <message name="IDS_BRAVE_WALLET_FEVM_ADDRESS_TRANSLATION_TITLE" desc="Warning message title displayed when trying to send from f1 to 0x">ETH address will be translated to the Filecoin address.</message>
   <message name="IDS_BRAVE_WALLET_FEVM_ADDRESS_TRANSLATION_DESCRIPTION" desc="Warning message description displayed when trying to send from f1 to 0x"><ph name="FILECOIN_ADDRESS">$1</ph> address in the Filecoin namespace will be used for the transaction.</message>
-  <message name="IDS_BRAVE_WALLET_ENTER_A_PASSSWORD_TO_CONTINUE" desc="Prompt to enter a password before continuing">Enter a password to continue</message>
+  <message name="IDS_BRAVE_WALLET_ENTER_A_PASSWORD_TO_CONTINUE" desc="Prompt to enter a password before continuing">Enter a password to continue</message>
   <message name="IDS_BRAVE_WALLET_ENTER_YOUR_PASSWORD_TO_START_BACKUP" desc="Password prompt description for backing up wallet">Enter your Brave Wallet password to start backing up wallet.</message>
   <message name="IDS_BRAVE_SWAP" desc="Swap main title">Swap</message>
   <message name="IDS_BRAVE_SWAP_REVIEW_ORDER" desc="Text for swap button">Review order</message>
@@ -1072,4 +1078,7 @@
   <message name="IDS_BRAVE_WALLET_PROCEED_BUTTON" desc="Proceed action button text">Proceed</message>
   <message name="IDS_BRAVE_WALLET_FOUND_ISSUES" desc="Notice that a number of issues were found">We found <ph name="VALUE">$1<ex>2</ex></ph> issues.</message>
   <message name="IDS_BRAVE_WALLET_NO_ROUTES_FOUND" desc="Error message for when no swap routes could be found">No routes found</message>
+  <message name="IDS_BRAVE_WALLET_ACCOUNT_NAME_TOO_LONG_ERROR" desc="An error that appears when the user enters an account name that is too long">Account name must be <ph name="VALUE">$1<ex>30</ex></ph> characters or less</message>
+  <message name="IDS_BRAVE_WALLET_ENTER_PASSWORD_IF_APPLICABLE" desc="A label for the input field for entering the password for an imported file">Enter password (if applicable)</message>
+  <message name="IDS_BRAVE_WALLET_PRIVATE_KEY_IMPORT_TYPE" desc="Label for the dropdown to select the format to use for importing a private key">Import type</message>
 </grit-part>

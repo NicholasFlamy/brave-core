@@ -5,6 +5,7 @@
 
 import styled from 'styled-components'
 import * as leo from '@brave/leo/tokens/css/variables'
+import Icon from '@brave/leo/react/icon'
 
 // Shared Styles
 import {
@@ -12,7 +13,8 @@ import {
   AssetIconFactory,
   Row,
   WalletButton,
-  Text
+  Text,
+  Column
 } from '../../../../components/shared/style'
 
 export const AssetIcon = AssetIconFactory<AssetIconProps>({
@@ -35,21 +37,10 @@ export const NetworkIconWrapper = styled.div`
 `
 
 export const ButtonWrapper = styled(Row)`
-  --background-hover: ${leo.color.container.background};
-  --shadow-hover: 0px 0px 16px rgba(99, 105, 110, 0.18);
-  @media (prefers-color-scheme: dark) {
-    --background-hover: transparent;
-    --shadow-hover: 0px 0px 16px rgba(0, 0, 0, 0.36);
-  }
-  flex-direction: row;
   background-color: transparent;
-  border-radius: 8px;
-  justify-content: space-between;
   white-space: nowrap;
-  margin-bottom: 8px;
   &:hover {
-    background-color: var(--background-hover);
-    box-shadow: var(--shadow-hover);
+    background-color: ${leo.color.page.background};
   }
 `
 
@@ -62,7 +53,7 @@ export const Button = styled(WalletButton)`
   background-color: transparent;
   justify-content: space-between;
   align-items: center;
-  padding: 8px;
+  padding: 10px 16px;
   white-space: nowrap;
   width: 100%;
   &:disabled {
@@ -80,19 +71,52 @@ export const IconsWrapper = styled.div`
   margin-right: 16px;
 `
 
-export const IconAndName = styled(Row)`
-  width: 80%;
-  white-space: pre-line;
+export const NameAndBalanceColumn = styled(Column)`
+  overflow: hidden;
 `
 
-export const NameAndBalanceText = styled(Text)`
+export const TokenNameRow = styled(Row)`
+  overflow: hidden;
+`
+
+export const LeftSide = styled(TokenNameRow)`
+  max-width: 100%;
+`
+
+export const TokenNameText = styled(Text)`
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
   line-height: 22px;
-  color: ${leo.color.text.primary};
+  white-space: nowrap;
 `
 
-export const NetworkAndFiatText = styled(Text)`
+export const FiatBalanceText = styled(Text)`
+  line-height: 22px;
+`
+
+export const TokenBalanceText = styled(Text)`
   line-height: 20px;
-  color: ${leo.color.text.secondary};
+`
+
+export const PercentChangeText = styled(TokenBalanceText)<{
+  isDown: boolean
+}>`
+  color: ${(p) =>
+    p.isDown
+      ? leo.color.systemfeedback.errorText
+      : leo.color.systemfeedback.successText};
+`
+
+export const PercentChangeIcon = styled(Icon)<{
+  isDown: boolean
+}>`
+  --leo-icon-size: 14px;
+  margin-right: 2px;
+  color: ${(p) =>
+    p.isDown
+      ? leo.color.systemfeedback.errorIcon
+      : leo.color.systemfeedback.successIcon};
 `
 
 export const DisabledLabel = styled.div`
@@ -108,4 +132,28 @@ export const DisabledLabel = styled.div`
   font-family: 'Poppins';
   padding: 4px 6px;
   border-radius: 4px;
+`
+
+export const AccountsIcon = styled(Icon).attrs({
+  name: 'user-accounts'
+})`
+  --leo-icon-size: 16px;
+  margin-right: 8px;
+  color: ${leo.color.icon.default};
+`
+
+export const InfoButton = styled(WalletButton)`
+  cursor: pointer;
+  background-color: none;
+  background: none;
+  outline: none;
+  border: none;
+  padding: 0px 16px 0px 0px;
+`
+
+export const InfoIcon = styled(Icon).attrs({
+  name: 'info-outline'
+})`
+  --leo-icon-size: 15px;
+  color: ${leo.color.icon.default};
 `
