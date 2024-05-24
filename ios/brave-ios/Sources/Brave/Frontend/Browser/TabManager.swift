@@ -234,6 +234,11 @@ class TabManager: NSObject {
     }
   }
 
+  func tabsCountForMode(isPrivate: Bool) -> Int {
+    let tabType: TabType = isPrivate ? .private : .regular
+    return tabs(withType: tabType).count
+  }
+
   private func tabs(withType type: TabType, query: String? = nil) -> [Tab] {
     assert(Thread.isMainThread)
 
@@ -946,10 +951,22 @@ class TabManager: NSObject {
     delegates.forEach { $0.get()?.tabManagerDidRemoveAllTabs(self, toast: nil) }
   }
 
-  @MainActor func removeAllForCurrentMode() {
+  @MainActor func removeAllForCurrentMode(isActiveTabIncluded: Bool = true) {
     isBulkDeleting = true
-    removeTabs(tabsForCurrentMode)
+
+    if isActiveTabIncluded {
+      removeTabs(tabsForCurrentMode)
+    } else {
+      let tabsToDelete = tabsForCurrentMode.filter {
+        guard let currentTab = selectedTab else { return false }
+        return currentTab.id != $0.id
+      }
+      removeTabs(tabsToDelete)
+    }
+
     isBulkDeleting = false
+    // No change needed here regarding to isActiveTabIncluded
+    // Toast value is nil and TabsBarViewController is updating the from current tabs
     delegates.forEach { $0.get()?.tabManagerDidRemoveAllTabs(self, toast: nil) }
   }
 
@@ -1215,11 +1232,16 @@ class TabManager: NSObject {
   }
 
   /// Function to add all the tabs to recently closed before the list is removef entirely by Close All Tabs
-  func addAllTabsToRecentlyClosed() {
+  func addAllTabsToRecentlyClosed(isActiveTabIncluded: Bool) {
     var allRecentlyClosed: [SavedRecentlyClosed] = []
 
-    tabs(withType: .regular).forEach {
-      if let savedItem = createRecentlyClosedFromActiveTab($0) {
+    for tab in tabs(withType: .regular) {
+      // Do not include the active tab for case isActiveTabIncluded is false
+      if !isActiveTabIncluded, let currentTab = selectedTab, currentTab.id == tab.id {
+        continue
+      }
+
+      if let savedItem = createRecentlyClosedFromActiveTab(tab) {
         allRecentlyClosed.append(savedItem)
       }
     }

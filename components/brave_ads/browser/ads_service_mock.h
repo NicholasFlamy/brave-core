@@ -61,7 +61,7 @@ class AdsServiceMock : public AdsService {
                TriggerAdEventCallback));
 
   MOCK_METHOD(std::optional<NewTabPageAdInfo>,
-              GetPrefetchedNewTabPageAdForDisplay,
+              MaybeGetPrefetchedNewTabPageAdForDisplay,
               ());
   MOCK_METHOD(void, PrefetchNewTabPageAd, ());
   MOCK_METHOD(void,
@@ -124,6 +124,8 @@ class AdsServiceMock : public AdsService {
               NotifyTabDidChange,
               (int32_t tab_id,
                const std::vector<GURL>& redirect_chain,
+               bool is_new_navigation,
+               bool is_restoring,
                bool is_error_page,
                bool is_visible));
   MOCK_METHOD(void, NotifyDidCloseTab, (int32_t tab_id));

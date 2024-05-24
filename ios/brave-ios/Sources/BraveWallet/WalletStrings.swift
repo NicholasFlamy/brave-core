@@ -276,61 +276,21 @@ extension Strings {
       comment:
         "A button title that shows a screen that allows the user to backup their recovery phrase"
     )
-    public static let defaultEthAccountName = NSLocalizedString(
-      "wallet.defaultEthAccountName",
+    public static let defaultAccountName = NSLocalizedString(
+      "wallet.defaultAccountName",
       tableName: "BraveWallet",
       bundle: .module,
-      value: "Ethereum Account %lld",
+      value: "%@ Account %lld",
       comment:
-        "The default Ethereum account name when adding a primary account and not entering a custom name. '%lld' refers to a number (for example \"Ethereum Account 3\")"
+        "The default account name when adding an account and not entering a custom name. '%@' refers to a coin type and '%lld' refers to a number (for example \"Ethereum Account 2\")"
     )
-    public static let defaultSolAccountName = NSLocalizedString(
-      "wallet.defaultSolAccountName",
+    public static let defaultTestnetAccountName = NSLocalizedString(
+      "wallet.defaultTestnetAccountName",
       tableName: "BraveWallet",
       bundle: .module,
-      value: "Solana Account %lld",
+      value: "%@ Testnet Account %lld",
       comment:
-        "The default Solana account name when adding a primary account and not entering a custom name. '%lld' refers to a number (for example \"Solana Account 3\")"
-    )
-    public static let defaultFilAccountName = NSLocalizedString(
-      "wallet.defaultFilAccountName",
-      tableName: "BraveWallet",
-      bundle: .module,
-      value: "Filecoin Account %lld",
-      comment:
-        "The default Filecoin account name when adding a primary account and not entering a custom name. '%lld' refers to a number (for example \"Filecoin Account 3\")"
-    )
-    public static let defaultBitcoinAccountName = NSLocalizedString(
-      "wallet.defaultBitcoinAccountName",
-      tableName: "BraveWallet",
-      bundle: .module,
-      value: "Bitcoin Account %lld",
-      comment:
-        "The default Bitcoin account name when adding a primary account and not entering a custom name. '%lld' refers to a number (for example \"Bitcoin Account 3\")"
-    )
-    public static let defaultSecondaryEthAccountName = NSLocalizedString(
-      "wallet.defaultSecondaryEthAccountName",
-      tableName: "BraveWallet",
-      bundle: .module,
-      value: "Secondary Ethereum Account %lld",
-      comment:
-        "The default account name when adding a secondary account and not entering a custom name. '%lld' refers to a number (for example \"Secondary Ethereum Account 3\")"
-    )
-    public static let defaultSecondarySolAccountName = NSLocalizedString(
-      "wallet.defaultSecondarySolAccountName",
-      tableName: "BraveWallet",
-      bundle: .module,
-      value: "Secondary Solana Account %lld",
-      comment:
-        "The default account name when adding a secondary account and not entering a custom name. '%lld' refers to a number (for example \"Secondary Solana Account 3\")"
-    )
-    public static let defaultSecondaryFilAccountName = NSLocalizedString(
-      "wallet.defaultSecondaryFilAccountName",
-      tableName: "BraveWallet",
-      bundle: .module,
-      value: "Secondary Filecoin Account %lld",
-      comment:
-        "The default account name when adding a secondary account and not entering a custom name. '%lld' refers to a number (for example \"Secondary Filecoin Account 3\")"
+        "The default account name when adding an account and not entering a custom name. '%@' refers to a coin type and '%lld' refers to a number (for example \"Filecoin Testnet Account 2\")"
     )
     public static let addAccountWithCoinTypeTitle = NSLocalizedString(
       "wallet.addAccountWithCoinTypeTitle",
@@ -2339,6 +2299,14 @@ extension Strings {
       value: "Invalid recipient address",
       comment:
         "An error that appears below the send crypto address text field, when the input `To` Filecoin address that is invalid"
+    )
+    public static let sendErrorBtcAddressNotValid = NSLocalizedString(
+      "wallet.sendErrorBtcAddressNotValid",
+      tableName: "BraveWallet",
+      bundle: .module,
+      value: "Not a valid BTC address",
+      comment:
+        "An error that appears below the send crypto address text field, when the input `To` address is not a valid Bitcoin address."
     )
     public static let customNetworkChainIdTitle = NSLocalizedString(
       "wallet.customNetworkChainIdTitle",
@@ -5550,6 +5518,45 @@ extension Strings {
       value: "Set as Default",
       comment:
         "One of the context menu option for user to tap to set a default network in wallet settings."
+    )
+    public static let btcOrdinalsUnsupportedWarning = NSLocalizedString(
+      "wallet.btcOrdinalsUnsupportedWarning",
+      tableName: "BraveWallet",
+      bundle: .module,
+      value: "Brave Wallet does not currently support Bitcoin NFTs (ordinals). Sending BTC from an address that has ordinals may result in its ordinals being transferred inadvertently.",
+      comment: "A warning displayed in row before the Send button in Send Crypto view when a Bitcoin asset is selected."
+    )
+    public static let inputLabel = NSLocalizedString(
+      "wallet.inputLabel",
+      tableName: "BraveWallet",
+      bundle: .module,
+      value: "Input",
+      comment:
+        "The label displayed in details for Bitcoin Transaction Confirmation details panel beside/above the Input index."
+    )
+    public static let outputLabel = NSLocalizedString(
+      "wallet.outputLabel",
+      tableName: "BraveWallet",
+      bundle: .module,
+      value: "Output",
+      comment:
+        "The label displayed in details for Bitcoin Transaction Confirmation details panel beside/above the Output index."
+    )
+    public static let valueLabel = NSLocalizedString(
+      "wallet.valueLabel",
+      tableName: "BraveWallet",
+      bundle: .module,
+      value: "Value",
+      comment:
+        "The label displayed in details for Bitcoin Transaction Confirmation details panel beside/above the value."
+    )
+    public static let addressLabel = NSLocalizedString(
+      "wallet.addressLabel",
+      tableName: "BraveWallet",
+      bundle: .module,
+      value: "Address",
+      comment:
+        "The label displayed in details for Bitcoin Transaction Confirmation details panel beside/above the address."
     )
   }
 }

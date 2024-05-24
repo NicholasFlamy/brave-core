@@ -7,6 +7,7 @@
 
 #include <memory>
 
+#include "base/test/scoped_feature_list.h"
 #include "base/time/time.h"
 #include "brave/components/brave_ads/core/internal/ad_units/ad_unittest_util.h"
 #include "brave/components/brave_ads/core/internal/common/unittest/unittest_base.h"
@@ -50,6 +51,7 @@ TEST_F(BraveAdsSiteVisitTest, DoNotLandOnPageIfTheLastClickedAdIsInvalid) {
 
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 
   // Act & Assert
@@ -67,6 +69,7 @@ TEST_F(BraveAdsSiteVisitTest,
   NotifyTabDidChange(
       /*tab_id=*/1,
       /*redirect_chain=*/{GURL("https://basicattentiontoken.org")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 
   // Act & Assert
@@ -84,10 +87,12 @@ TEST_F(BraveAdsSiteVisitTest, DoNotLandOnPageIfTheSameTabIsAlreadyLanding) {
               OnMaybeLandOnPage(ad, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com/about")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 
   ASSERT_EQ(1U, GetPendingTaskCount());
@@ -107,6 +112,10 @@ TEST_F(BraveAdsSiteVisitTest, DoNotLandOnPageIfTheSameTabIsAlreadyLanding) {
 TEST_F(
     BraveAdsSiteVisitTest,
     SuspendPageLandWhenTabBecomesOccludedThenResumePageLandWhenTabBecomesVisible) {
+  base::test::ScopedFeatureList scoped_feature_list;
+  scoped_feature_list.InitAndEnableFeatureWithParameters(
+      brave_ads::kSiteVisitFeature, {{"page_land_after", "10s"}});
+
   // Tab 1 (Visible/Start page landing)
   const AdInfo ad_1 = test::BuildAd(AdType::kNotificationAd,
                                     /*should_use_random_uuids=*/true);
@@ -116,6 +125,7 @@ TEST_F(
               OnMaybeLandOnPage(ad_1, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -132,6 +142,7 @@ TEST_F(
                   /*remaining_time=*/base::Seconds(3)));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/false);
 
   ASSERT_FALSE(HasPendingTasks());
@@ -145,6 +156,7 @@ TEST_F(
               OnMaybeLandOnPage(ad_2, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/2, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -161,6 +173,7 @@ TEST_F(
                   /*remaining_time=*/base::Seconds(7)));
   NotifyTabDidChange(
       /*tab_id=*/2, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/false);
   ASSERT_FALSE(HasPendingTasks());
 
@@ -175,6 +188,7 @@ TEST_F(
                   /*remaining_time=*/base::Seconds(3)));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -199,6 +213,7 @@ TEST_F(
                   /*remaining_time=*/base::Seconds(7)));
   NotifyTabDidChange(
       /*tab_id=*/2, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -227,6 +242,7 @@ TEST_F(
               OnMaybeLandOnPage(ad, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -283,6 +299,7 @@ TEST_F(
               OnMaybeLandOnPage(ad, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -338,6 +355,7 @@ TEST_F(BraveAdsSiteVisitTest,
               OnMaybeLandOnPage(ad_1, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -352,6 +370,7 @@ TEST_F(BraveAdsSiteVisitTest,
                   kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/false);
   ASSERT_FALSE(HasPendingTasks());
 
@@ -364,6 +383,7 @@ TEST_F(BraveAdsSiteVisitTest,
               OnMaybeLandOnPage(ad_2, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/2, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -378,6 +398,7 @@ TEST_F(BraveAdsSiteVisitTest,
                   kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/2, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/false);
   ASSERT_FALSE(HasPendingTasks());
 
@@ -392,6 +413,7 @@ TEST_F(BraveAdsSiteVisitTest,
                   kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -416,6 +438,7 @@ TEST_F(BraveAdsSiteVisitTest,
                   kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/2, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -444,6 +467,7 @@ TEST_F(BraveAdsSiteVisitTest,
               OnMaybeLandOnPage(ad, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -471,6 +495,7 @@ TEST_F(
               OnMaybeLandOnPage(ad, /*after=*/kPageLandAfter.Get()));
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/true, /*is_visible=*/true);
   ASSERT_EQ(1U, GetPendingTaskCount());
 
@@ -494,10 +519,12 @@ TEST_F(BraveAdsSiteVisitTest, DoNotLandOnPageIfTheTabIsOccluded) {
 
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com/new_tab")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com/new_tab")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/false);
 
   // Act & Assert
@@ -516,6 +543,7 @@ TEST_F(
   NotifyTabDidChange(
       /*tab_id=*/1,
       /*redirect_chain=*/{GURL("https://basicattentiontoken.org")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 
   // Act & Assert
@@ -532,6 +560,7 @@ TEST_F(BraveAdsSiteVisitTest,
 
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 
   // Act & Assert
@@ -539,6 +568,7 @@ TEST_F(BraveAdsSiteVisitTest,
   NotifyTabDidChange(
       /*tab_id=*/1,
       /*redirect_chain=*/{GURL("https://basicattentiontoken.org")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 }
 
@@ -550,6 +580,7 @@ TEST_F(BraveAdsSiteVisitTest, CancelPageLandIfTheTabIsClosed) {
 
   NotifyTabDidChange(
       /*tab_id=*/1, /*redirect_chain=*/{GURL("https://brave.com")},
+      /*is_new_navigation=*/true, /*is_restoring=*/false,
       /*is_error_page=*/false, /*is_visible=*/true);
 
   // Act & Assert

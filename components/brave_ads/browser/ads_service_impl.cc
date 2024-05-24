@@ -313,6 +313,10 @@ bool AdsServiceImpl::UserHasOptedInToNotificationAds() const {
   return profile_->GetPrefs()->GetBoolean(prefs::kOptedInToNotificationAds);
 }
 
+bool AdsServiceImpl::UserHasOptedInToSearchResultAds() const {
+  return profile_->GetPrefs()->GetBoolean(prefs::kOptedInToSearchResultAds);
+}
+
 void AdsServiceImpl::InitializeNotificationsForCurrentProfile() {
   NotificationHelper::GetInstance()->InitForProfile(profile_);
 
@@ -339,7 +343,8 @@ void AdsServiceImpl::GetDeviceIdAndMaybeStartBatAdsServiceCallback(
 bool AdsServiceImpl::CanStartBatAdsService() const {
   return ShouldAlwaysRunService() || UserHasOptedInToBraveNewsAds() ||
          (UserHasJoinedBraveRewards() && (UserHasOptedInToNotificationAds() ||
-                                          UserHasOptedInToNewTabPageAds()));
+                                          UserHasOptedInToNewTabPageAds() ||
+                                          UserHasOptedInToSearchResultAds()));
 }
 
 void AdsServiceImpl::MaybeStartBatAdsService() {
@@ -1193,7 +1198,7 @@ void AdsServiceImpl::PrefetchNewTabPageAd() {
 }
 
 std::optional<NewTabPageAdInfo>
-AdsServiceImpl::GetPrefetchedNewTabPageAdForDisplay() {
+AdsServiceImpl::MaybeGetPrefetchedNewTabPageAdForDisplay() {
   if (!bat_ads_associated_remote_.is_bound()) {
     return std::nullopt;
   }
@@ -1362,11 +1367,14 @@ void AdsServiceImpl::NotifyTabDidStopPlayingMedia(const int32_t tab_id) {
 
 void AdsServiceImpl::NotifyTabDidChange(const int32_t tab_id,
                                         const std::vector<GURL>& redirect_chain,
+                                        const bool is_new_navigation,
+                                        const bool is_restoring,
                                         const bool is_error_page,
                                         const bool is_visible) {
   if (bat_ads_client_notifier_remote_.is_bound()) {
     bat_ads_client_notifier_remote_->NotifyTabDidChange(
-        tab_id, redirect_chain, is_error_page, is_visible);
+        tab_id, redirect_chain, is_new_navigation, is_restoring, is_error_page,
+        is_visible);
   }
 }
 
@@ -1620,7 +1628,7 @@ void AdsServiceImpl::LoadComponentResource(
     const int version,
     LoadComponentResourceCallback callback) {
   std::optional<base::FilePath> file_path =
-      g_brave_browser_process->resource_component()->GetPath(id, version);
+      g_brave_browser_process->resource_component()->MaybeGetPath(id, version);
   if (!file_path) {
     return std::move(callback).Run({});
   }

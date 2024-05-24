@@ -187,8 +187,8 @@ public class BraveRewards: NSObject {
     isSelected: Bool,
     isPrivate: Bool
   ) {
-    // Don't report update for tabs that haven't finished loading.
     guard let url = tab.redirectChain.last else {
+      // Don't report update for tabs that haven't finished loading.
       return
     }
 
@@ -201,6 +201,8 @@ public class BraveRewards: NSObject {
       ads.notifyTabDidChange(
         tabId,
         redirectChain: tab.redirectChain,
+        isNewNavigation: true,
+        isRestoring: InternalURL(url)?.isSessionRestore ?? false,
         isErrorPage: InternalURL(url)?.isErrorPage ?? false,
         isSelected: isSelected
       )

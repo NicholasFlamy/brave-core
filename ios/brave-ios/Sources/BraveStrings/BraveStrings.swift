@@ -489,6 +489,13 @@ extension Strings {
     value: "Close All %i Tabs",
     comment: ""
   )
+  public static let closeAllOtherTabsTitle = NSLocalizedString(
+    "closeAllOtherTabsTitle",
+    tableName: "BraveShared",
+    bundle: .module,
+    value: "Close All Other Tabs",
+    comment: "Title for asking user to close all tabs except the active tab."
+  )
   public static let closeAllTabsPrompt =
     NSLocalizedString(
       "closeAllTabsPrompt",
@@ -496,6 +503,14 @@ extension Strings {
       bundle: .module,
       value: "Are you sure you want to close all open tabs?",
       comment: "We ask users this prompt before attempting to close multiple tabs via context menu"
+    )
+  public static let closeAllOtherTabsPrompt =
+    NSLocalizedString(
+      "closeAllOtherTabsPrompt",
+      tableName: "BraveShared",
+      bundle: .module,
+      value: "Are you sure you want to close all other open tabs?",
+      comment: "We ask users this prompt before attempting to close all tabs except active one via context menu"
     )
   public static let savedTabsFolderTitle = NSLocalizedString(
     "SavedTabsFolderTitle",
@@ -3232,13 +3247,6 @@ extension Strings {
     value: "Show History",
     comment: "Button to show the history list"
   )
-  public static let addBookmark = NSLocalizedString(
-    "AddBookmark",
-    tableName: "BraveShared",
-    bundle: .module,
-    value: "Add Bookmark",
-    comment: "Button to add a bookmark"
-  )
   public static let editBookmark = NSLocalizedString(
     "EditBookmark",
     tableName: "BraveShared",
@@ -3621,6 +3629,14 @@ extension Strings {
       bundle: .module,
       value: "Copy app size info to clipboard.",
       comment: "Copy app info to clipboard action sheet action."
+    )
+  public static let copyTabsDebugToClipboard =
+    NSLocalizedString(
+      "copyTabsDebugToClipboard",
+      tableName: "BraveShared",
+      bundle: .module,
+      value: "Copy Tabs info to clipboard.",
+      comment: "Copy Tabs info to clipboard action sheet action."
     )
   public static let blockThirdPartyCookies = NSLocalizedString(
     "Block3rdPartyCookies",
@@ -11358,4 +11374,23 @@ extension Strings {
     comment:
       "This is an error message when a user tries to enter a non-https scheme URL into the 'add custom filter list URL' input field"
   )
+}
+
+// MARK: - Paywall
+
+extension Strings {
+  public struct Paywall {
+    public static let alreadyPurchasedTitle = NSLocalizedString(
+      "paywall.alreadyPurchasedTitle",
+      bundle: .module,
+      value: "Already purchased on brave.com?",
+      comment: "Title label text for refreshing credentials from brave site."
+    )
+    public static let refreshCredentialsButtonTitle = NSLocalizedString(
+      "paywall.refreshCredentialsButtonTitle",
+      bundle: .module,
+      value: "Refresh your credentials",
+      comment: "Button action text for refreshing credentials from brave site."
+    )
+  }
 }

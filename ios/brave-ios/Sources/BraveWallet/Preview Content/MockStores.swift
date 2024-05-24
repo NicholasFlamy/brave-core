@@ -105,6 +105,7 @@ extension KeyringStore {
   static var previewStoreWithWalletCreated: KeyringStore {
     let store = KeyringStore.previewStore
     store.createWallet(password: "password")
+    store.allAccounts = [.previewAccount, .mockSolAccount]
     return store
   }
 }
@@ -134,6 +135,7 @@ extension SendTokenStore {
       assetRatioService: MockAssetRatioService(),
       ethTxManagerProxy: MockEthTxManagerProxy(),
       solTxManagerProxy: BraveWallet.TestSolanaTxManagerProxy.previewProxy,
+      bitcoinWalletService: BraveWallet.TestBitcoinWalletService.previewBitcoinWalletService,
       prefilledToken: .previewToken,
       ipfsApi: TestIpfsAPI(),
       userAssetManager: TestableWalletUserAssetManager()
@@ -226,6 +228,7 @@ extension TransactionConfirmationStore {
         return service
       }(),
       solTxManagerProxy: BraveWallet.TestSolanaTxManagerProxy.previewProxy,
+      bitcoinWalletService: BraveWallet.TestBitcoinWalletService.previewBitcoinWalletService,
       ipfsApi: TestIpfsAPI(),
       userAssetManager: TestableWalletUserAssetManager()
     )
