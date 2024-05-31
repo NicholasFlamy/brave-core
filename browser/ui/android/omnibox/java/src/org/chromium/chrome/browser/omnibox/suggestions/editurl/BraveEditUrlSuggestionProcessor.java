@@ -15,6 +15,7 @@ import org.chromium.chrome.browser.omnibox.suggestions.SuggestionHost;
 import org.chromium.chrome.browser.share.ShareDelegate;
 import org.chromium.chrome.browser.tab.Tab;
 import org.chromium.components.omnibox.AutocompleteMatch;
+import org.chromium.components.omnibox.OmniboxSuggestionType;
 
 import java.util.Optional;
 
@@ -34,9 +35,14 @@ public class BraveEditUrlSuggestionProcessor extends EditUrlSuggestionProcessor 
 
     @Override
     public boolean doesProcessSuggestion(@NonNull AutocompleteMatch suggestion, int position) {
-        // If url hasn't changed we still want to show the edit url suggestion.
+        // Edit url suggestion only applicable to the first entry.
         Tab activeTab = mTabSupplier.get();
-        if (activeTab != null && suggestion.getUrl().equals(activeTab.getUrl())) {
+        if (position == 0
+                && activeTab != null
+                && (suggestion.getType() == OmniboxSuggestionType.URL_WHAT_YOU_TYPED
+                        || suggestion.getUrl().equals(activeTab.getUrl()))) {
+            // Show edit url suggestion for typed URLs.
+            // If url hasn't changed we still want to show the edit url suggestion.
             return true;
         }
 

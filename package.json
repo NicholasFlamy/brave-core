@@ -1,6 +1,6 @@
 {
   "name": "brave-core",
-  "version": "1.68.44",
+  "version": "1.68.64",
   "description": "Brave Core is a set of changes, APIs and scripts used for customizing Chromium to make Brave.",
   "main": "index.js",
   "scripts": {
@@ -66,7 +66,7 @@
     "projects": {
       "chrome": {
         "dir": "src",
-        "tag": "125.0.6422.112",
+        "tag": "126.0.6478.26",
         "repository": {
           "url": "https://github.com/flamy-brave/brave-chromium-custom-sync"
         }

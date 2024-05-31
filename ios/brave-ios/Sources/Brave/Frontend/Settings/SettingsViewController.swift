@@ -798,7 +798,8 @@ class SettingsViewController: TableViewController {
         let model = AIChatViewModel(
           braveCore: self.braveCore,
           webView: self.tabManager.selectedTab?.webView,
-          script: BraveLeoScriptHandler.self
+          script: BraveLeoScriptHandler.self,
+          braveTalkScript: nil
         )
 
         let controller = UIHostingController(
@@ -1016,7 +1017,7 @@ class SettingsViewController: TableViewController {
     var section = Static.Section(
       header: "Developer Options",
       rows: [
-        Row(text: "Region: \(Locale.current.regionCode ?? "--")"),
+        Row(text: "Region: \(Locale.current.region?.identifier ?? "--")"),
         Row(
           text: "Sandbox Inspector",
           selection: { [unowned self] in
